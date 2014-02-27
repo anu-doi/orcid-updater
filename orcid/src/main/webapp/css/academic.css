@@ -1,0 +1,18 @@
+.info label {
+	font-weight: bold;
+	width: 130px;
+	display: inline-block;
+}
+
+li.has-tooltip label:hover {
+	cursor: pointer;
+}
+li.has-tooltip div label {
+	font-weight: bold;
+}
+li.has-tooltip div {
+	display: none;
+}
+li.show-tooltip div {
+	display: block;
+}
