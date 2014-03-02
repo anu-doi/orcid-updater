@@ -28,7 +28,7 @@ import au.edu.anu.orcid.auth.orcid.OAuthConstants;
 import au.edu.anu.orcid.auth.orcid.OAuthException;
 import au.edu.anu.orcid.auth.orcid.OrcidException;
 import au.edu.anu.orcid.db.model.Person;
-import au.edu.anu.orcid.retrieve.UidObtainer;
+import au.edu.anu.orcid.process.retrieve.UidObtainer;
 
 @Path("/uid")
 public class RecordUidResource {
@@ -58,7 +58,6 @@ public class RecordUidResource {
 	public Response beginRecordUpdateRequest(@PathParam("uid") String uid, @QueryParam("action") String action
 			, @Context UriInfo uriInfo) throws OAuthException {
 		
-		getUpdateRedirectURI(uid, uriInfo);
 		Person person = obtainer.getPerson(uid);
 		OAuthAuthenticator auth = new OAuthAuthenticator();
 		if (person.getOrcid() != null) {
@@ -68,17 +67,6 @@ public class RecordUidResource {
 		else {
 			LOGGER.info("User needs to be created in orcid: {}", person.getUid());
 			OrcidMessage message = obtainer.getFullOrcidProfile(uid);
-			/*try {
-				JAXBContext context = JAXBContext.newInstance(OrcidMessage.class);
-				Marshaller m = context.createMarshaller();
-				m.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.TRUE);
-				StringWriter sw = new StringWriter();
-				m.marshal(message, sw);
-				LOGGER.info("XML: {}", sw.toString());
-			}
-			catch (JAXBException e) {
-				LOGGER.error("Exception transforming document", e);
-			}*/
 			String orcid = auth.createOrcid(message);
 			person.setOrcid(orcid);
 			obtainer.updatePerson(person);
