@@ -1,3 +1,23 @@
+/*******************************************************************************
+ * Australian National University Orcid Updater
+ * Copyright (C) 2013  The Australian National University
+ * 
+ * This file is part of Australian National University Orcid Updater.
+ * 
+ * Australian National University Orcid Updater is free software: you
+ * can redistribute it and/or modify it under the terms of the GNU
+ * General Public License as published by the Free Software Foundation,
+ * either version 3 of the License, or (at your option) any later
+ * version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ ******************************************************************************/
 package au.edu.anu.orcid.display;
 
 import java.io.UnsupportedEncodingException;
@@ -30,6 +50,16 @@ import au.edu.anu.orcid.auth.orcid.OrcidException;
 import au.edu.anu.orcid.db.model.Person;
 import au.edu.anu.orcid.process.retrieve.IdObtainer;
 
+/**
+ * <p>RecordIdResource</p>
+ *
+ * <p>The Australian National University</p>
+ *
+ * <p>Classes to display a page based on the persons database identifier</p>
+ *
+ * @author Genevieve Turner
+ *
+ */
 @Path("/id")
 public class RecordIdResource {
 	static final Logger LOGGER = LoggerFactory.getLogger(RecordIdResource.class);
@@ -37,6 +67,12 @@ public class RecordIdResource {
 	@Inject
 	IdObtainer obtainer;
 	
+	/**
+	 * Get the page that displays the users information
+	 * 
+	 * @param id The identifier
+	 * @return The page
+	 */
 	@GET
 	@Path("/{id}")
 	public Response getPage(@PathParam("id") Long id) {
@@ -51,6 +87,15 @@ public class RecordIdResource {
 		return Response.ok(viewable).build();
 	}
 	
+	/**
+	 * Create the record in ORCID
+	 * 
+	 * @param id The id of the person to create the record for
+	 * @param action The action to perform
+	 * @param uriInfo The uri information
+	 * @return The response
+	 * @throws OAuthException
+	 */
 	@GET
 	@Path("/{id}/export/orcid")
 	public Response beginRecordUpdateRequest(@PathParam("id") Long id, @QueryParam("action") String action
@@ -59,9 +104,6 @@ public class RecordIdResource {
 		OAuthAuthenticator auth = new OAuthAuthenticator();
 		if (person.getOrcid() != null) {
 			LOGGER.info("User has an orcid: {}", person.getOrcid());
-		//	URI redirectURI = getUpdateRedirectURI(id, uriInfo);
-		//	URI codeUrl = auth.getAuthorizationCodeRequestUri(OAuthConstants.WORKS_CREATE, redirectURI.toString());
-		//	Response.seeOther(codeUrl);
 		}
 		else {
 			LOGGER.info("User needs to be created in orcid: {}", person.getUid());
@@ -73,42 +115,60 @@ public class RecordIdResource {
 		return Response.seeOther(getPageURI(id, uriInfo)).build();
 	}
 	
+	/**
+	 * Begin the process of sending works to ORCID by redirecting to get an authorization code
+	 * 
+	 * @param id The id of the person to add works to
+	 * @param uriInfo The URI information
+	 * @return The response
+	 * @throws UnsupportedEncodingException
+	 */
 	@GET
 	@Produces(MediaType.TEXT_HTML)
 	@Path("/{id}/export/orcid/add-works")
-	public Response updateWorks(@PathParam("id") Long id, @Context UriInfo uriInfo) throws UnsupportedEncodingException {
-		LOGGER.info("In add works");
+	public Response updateWorks(@PathParam("id") Long id, @Context UriInfo uriInfo) {
+		LOGGER.debug("In add works");
 		URI getRedirectURI = getUpdateRedirectURI(id, uriInfo);
 		LOGGER.info("Redirect URI {}", getRedirectURI.toString());
-		//auth.addWorks(orcid, message, authorizationCode);
 		OAuthAuthenticator auth = new OAuthAuthenticator();
 		URI codeRequestURI = auth.getAuthorizationCodeRequestUri(OAuthConstants.WORKS_CREATE, getRedirectURI.toString());
 		
 		LOGGER.info("URI to go to: {}", codeRequestURI);
 		return Response.seeOther(codeRequestURI).build();
-		//return Response.ok("Went to add works!").build();
 	}
 	
+	/**
+	 * Use the authorization code and add works to the persons ORCID profile
+	 * 
+	 * @param id The id of the person
+	 * @param authorizationCode The authorization code
+	 * @param uriInfo The URI information
+	 * @return The response
+	 * @throws OAuthException
+	 * @throws OrcidException
+	 */
 	@GET
 	@Produces(MediaType.TEXT_HTML)
 	@Path("/{uid}/export/orcid/add-works/process")
 	public Response updateWorks(@PathParam("id") Long id, @QueryParam("code") String authorizationCode, @Context UriInfo uriInfo)
 			 throws OAuthException, OrcidException {
-		LOGGER.info("In process add works");
+		LOGGER.debug("In process add works");
 		OAuthAuthenticator auth = new OAuthAuthenticator();
 		AccessToken token = auth.getAccessTokenFromAuthorizationCode(authorizationCode);
-		//Person person = obtainer.getPerson(uid);
 		OrcidMessage message = obtainer.getOrcidWorks(id);
-		//OrcidMessage message = person.
-		LOGGER.info("Adding Works");
+		LOGGER.debug("Adding Works");
 		auth.addWorks(token, message);
-		//auth.addWorks(person.getOrcid(), message, authorizationCode);
-		LOGGER.info("Works added");
-		//auth.addWorks(orcid, message, authorizationCode);
-		//return Response.ok("Made it to update works!").build();
+		LOGGER.debug("Works added");
 		return Response.seeOther(getPageURI(id, uriInfo)).build();
 	}
 	
+	/**
+	 * Get the URI for the page that displays the information about the person
+	 * 
+	 * @param id The id of the person
+	 * @param uriInfo  The URI information
+	 * @return The URI
+	 */
 	private URI getPageURI(Long id, UriInfo uriInfo) {
 		UriBuilder builder = UriBuilder.fromUri(uriInfo.getBaseUri());
 		builder.path("id");
@@ -116,6 +176,13 @@ public class RecordIdResource {
 		return builder.build();
 	}
 	
+	/**
+	 * Get the URI to process the adding of works
+	 * 
+	 * @param id The id of the person
+	 * @param uriInfo The URI information
+	 * @return The URI
+	 */
 	private URI getUpdateRedirectURI(Long id, UriInfo uriInfo) {
 		UriBuilder builder = UriBuilder.fromUri(uriInfo.getBaseUri());
 		builder.path("id");
@@ -125,6 +192,13 @@ public class RecordIdResource {
 		return builder.build();
 	}
 	
+	/**
+	 * Import a users record
+	 * 
+	 * @param id The id of the person
+	 * @param uriInfo The URI information
+	 * @return The response
+	 */
 	@GET
 	@Path("/{id}/import")
 	public Response updatePerson(@PathParam("id") Long id, @Context UriInfo uriInfo) {

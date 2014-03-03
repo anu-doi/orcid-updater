@@ -300,7 +300,7 @@ public class OAuthAuthenticator {
 	 * @return The uri
 	 * @throws UnsupportedEncodingException
 	 */
-	public URI getAuthorizationCodeRequestUri(String scope, String redirectURI) throws UnsupportedEncodingException {
+	public URI getAuthorizationCodeRequestUri(String scope, String redirectURI) {
 		UriBuilder builder = UriBuilder.fromPath(orcidProperties_.getProperty("orcid.auth.uri")).path("oauth").path("authorize");
 		builder = builder. queryParam("client_id", clientId_);
 		builder = builder.queryParam("response_type", "code");

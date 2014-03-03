@@ -1,3 +1,23 @@
+/*******************************************************************************
+ * Australian National University Orcid Updater
+ * Copyright (C) 2013  The Australian National University
+ * 
+ * This file is part of Australian National University Orcid Updater.
+ * 
+ * Australian National University Orcid Updater is free software: you
+ * can redistribute it and/or modify it under the terms of the GNU
+ * General Public License as published by the Free Software Foundation,
+ * either version 3 of the License, or (at your option) any later
+ * version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ ******************************************************************************/
 package au.edu.anu.orcid.process.retrieve;
 
 import java.util.List;
@@ -15,13 +35,19 @@ import org.slf4j.LoggerFactory;
 
 import au.edu.anu.orcid.db.model.Person;
 
+/**
+ * <p>UidObtainer</p>
+ *
+ * <p>The Australian National University</p>
+ *
+ * <p>Obtain information with the university id</p>
+ *
+ * @author Genevieve Turner
+ *
+ */
 public class UidObtainer implements Obtainer<String> {
 	static final Logger LOGGER = LoggerFactory.getLogger(UidObtainer.class);
-	
-	//@Inject
-	//ObtainInformation<Person, OrcidBio> personOI;
-	//ObtainInformation<Person, OrcidBio> oi = new ObtainPersonInformation();
-	
+
 	@Inject
 	ObtainPersonInformation personOI;
 	
@@ -53,7 +79,14 @@ public class UidObtainer implements Obtainer<String> {
 		
 		return message;
 	}
+
 	
+	/**
+	 * Get the persons  profile
+	 * 
+	 * @param uid The university identifier
+	 * @return The profile
+	 */
 	private OrcidProfile getProfile(String uid) {
 		OrcidProfile profile = new OrcidProfile();
 		
@@ -74,13 +107,23 @@ public class UidObtainer implements Obtainer<String> {
 		return profile;
 	}
 	
+	/**
+	 * Get the persons bio information
+	 * 
+	 * @param uid The university identifier
+	 * @return The bio information
+	 */
 	private OrcidBio getBio(String uid) {
-		//ObtainInformation<Person, OrcidBio> personOI = new ObtainPersonInformation();
 		return personOI.getOrcidObject(uid);
 	}
 	
+	/**
+	 * Get the persons works
+	 * 
+	 * @param uid The university identifier
+	 * @return The persons works
+	 */
 	private OrcidWorks getWorks(String uid) {
-		//ObtainInformation<List<Publication>, List<OrcidWork>> pubOI = new ObtainPublicationInformation();
 		List<OrcidWork> pubWorks = pubOI.getOrcidObject(uid);
 		if (pubWorks.size() > 0) {
 			OrcidWorks orcidWorks = new OrcidWorks();
@@ -93,14 +136,11 @@ public class UidObtainer implements Obtainer<String> {
 
 	@Override
 	public Person getPerson(String uid) {
-		//ObtainInformation<Person, OrcidBio> personOI = new ObtainPersonInformation();
 		return personOI.get(uid);
 	}
 
 	@Override
 	public Person fetchPerson(String uid) {
-		//ObtainInformation<Person, OrcidBio> personOI = new ObtainPersonInformation();
-		//ObtainInformation<List<Publication>, List<OrcidWork>> pubOI = new ObtainPublicationInformation();
 		
 		Person person = personOI.fetch(uid);
 		pubOI.fetch(uid);
@@ -110,7 +150,6 @@ public class UidObtainer implements Obtainer<String> {
 
 	@Override
 	public void updatePerson(Person person) {
-		//ObtainInformation<Person, OrcidBio> personOI = new ObtainPersonInformation();
 		personOI.save(person);
 	}
 

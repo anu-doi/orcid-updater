@@ -4,7 +4,6 @@ import static org.junit.Assert.fail;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
-import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -17,8 +16,6 @@ import org.junit.Ignore;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import au.edu.anu.orcid.util.PropertyLoader;
 
 public class OAuthAuthenticationTest {
 	static final Logger LOGGER = LoggerFactory.getLogger(OAuthAuthenticationTest.class);
@@ -65,20 +62,14 @@ public class OAuthAuthenticationTest {
 	public void getAuthorizationURLTest() {
 		OAuthAuthenticator authenticator = new OAuthAuthenticator();
 		String redirectURI = "http://23wj72s.uds.anu.edu.au/rest/uid/t1111111";
-		try {
-			URI getCodeURL = authenticator.getAuthorizationCodeRequestUri(OAuthConstants.WORKS_CREATE, redirectURI);
-			LOGGER.info("Code: {}", getCodeURL.toString());
-			Client client = ClientBuilder.newClient();
-			WebTarget target = client.target(getCodeURL);
-			Response response = target.request().get();
-			LOGGER.info("Status: {}", response.getStatus());
-			String responseValue = response.readEntity(String.class);
-			LOGGER.info("Value: {}", responseValue);
-		}
-		catch (UnsupportedEncodingException e) {
-			LOGGER.error("Error encoding to url");
-			fail("Error encoding to url");
-		}
+		URI getCodeURL = authenticator.getAuthorizationCodeRequestUri(OAuthConstants.WORKS_CREATE, redirectURI);
+		LOGGER.info("Code: {}", getCodeURL.toString());
+		Client client = ClientBuilder.newClient();
+		WebTarget target = client.target(getCodeURL);
+		Response response = target.request().get();
+		LOGGER.info("Status: {}", response.getStatus());
+		String responseValue = response.readEntity(String.class);
+		LOGGER.info("Value: {}", responseValue);
 	}
 
 	@Ignore
