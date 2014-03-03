@@ -51,7 +51,7 @@ public abstract class ObtainPublicationInformation implements ObtainInformation<
 		}
 		//TODO remove publications no longer associated with the person!
 		for (Publication publication : publications) {
-			Publication savedPublication = publicationDAO.getByExternalIdentifier(publication.getAriesId());
+			Publication savedPublication = publicationDAO.getByExternalIdentifier(publication.getExternalIdentifier());
 			LOGGER.info("Publication TItle: {}", publication.getTitle());
 			if (savedPublication == null) {
 				LOGGER.info("Saving publication: {}", publication.getTitle());
@@ -60,7 +60,7 @@ public abstract class ObtainPublicationInformation implements ObtainInformation<
 			else if (!savedPublication.equals(publication)) {
 				LOGGER.info("Number of saved authors: {}", savedPublication.getAuthors().size());
 				LOGGER.info("Publication needs to be updated");
-				savedPublication.setAriesId(publication.getAriesId());
+				savedPublication.setExternalIdentifier(publication.getExternalIdentifier());
 				savedPublication.setTitle(publication.getTitle());
 				savedPublication.setPublicationName(publication.getPublicationName());
 				savedPublication.setPublicationYear(publication.getPublicationYear());

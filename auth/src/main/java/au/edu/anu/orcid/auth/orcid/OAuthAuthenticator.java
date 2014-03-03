@@ -1,3 +1,23 @@
+/*******************************************************************************
+ * Australian National University Orcid Updater
+ * Copyright (C) 2013  The Australian National University
+ * 
+ * This file is part of Australian National University Orcid Updater.
+ * 
+ * Australian National University Orcid Updater is free software: you
+ * can redistribute it and/or modify it under the terms of the GNU
+ * General Public License as published by the Free Software Foundation,
+ * either version 3 of the License, or (at your option) any later
+ * version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ ******************************************************************************/
 package au.edu.anu.orcid.auth.orcid;
 
 import java.io.UnsupportedEncodingException;
@@ -33,16 +53,25 @@ public class OAuthAuthenticator {
 	
 	AccessToken createToken_;
 	
+	private static Client client_;
+	
+	/**
+	 * Constructor
+	 */
 	public OAuthAuthenticator() {
-		LOGGER.info("Match URL: {}", orcidMatchUrl);
-		LOGGER.info("Pattern URL: {}", orcidUrlPattern.toString());
-		
+		LOGGER.debug("Match URL: {}", orcidMatchUrl);
+		LOGGER.debug("Pattern URL: {}", orcidUrlPattern.toString());
 	}
 	
-	private static Client client_;
+	/**
+	 * Get the client object.
+	 * 
+	 * @return The client
+	 */
 	private Client getClient() {
 		if (client_ == null) {
 			ClientBuilder clientBuilder = ClientBuilder.newBuilder();
+			// Ignore the hsotname if debug is set to true.
 			if ("true".equals(orcidProperties_.getProperty("debug"))) {
 				clientBuilder.hostnameVerifier(new Verifier());
 			}
@@ -52,6 +81,13 @@ public class OAuthAuthenticator {
 		return client_;
 	}
 	
+	/**
+	 * Create an orcid
+	 * 
+	 * @param message The message that will be sent to orcid to create the record
+	 * @return The orcid id
+	 * @throws OAuthException
+	 */
 	public String createOrcid(OrcidMessage message) throws OAuthException {
 		if (message != null) {
 			String authorizationStr = getCreateCredentials();
@@ -87,6 +123,12 @@ public class OAuthAuthenticator {
 		return null;
 	}
 	
+	/**
+	 * Get the create credentials
+	 * 
+	 * @return The create credentials
+	 * @throws OAuthException
+	 */
 	private String getCreateCredentials() throws OAuthException {
 		LOGGER.info("In getCreateCredentials");
 		if (createToken_ == null) {
@@ -115,13 +157,30 @@ public class OAuthAuthenticator {
 		return createToken_.getTokenType() + " " + createToken_.getAccessToken();
 	}
 	
+	/**
+	 * Add new works to the users list of publications in orcid
+	 * 
+	 * @param orcid The orcid id
+	 * @param message The message to add the works
+	 * @param authorizationCode The authorization code
+	 * @throws OAuthException
+	 * @throws OrcidException
+	 */
 	public void addWorks(String orcid, OrcidMessage message, String authorizationCode) throws OAuthException, OrcidException {
 		AccessToken token = getAccessTokenFromAuthorizationCode(authorizationCode);
-		LOGGER.info("{} - {} - {}", token.getTokenType(), token.getAccessToken(), token.getRefreshToken());
+		LOGGER.debug("{} - {} - {}", token.getTokenType(), token.getAccessToken(), token.getRefreshToken());
 		addWorks(token, message);
 	}
 	
+	/**
+	 * Add new works to the users list of publications in orcid
+	 * 
+	 * @param token The access token
+	 * @param message The message to add the works
+	 * @throws OrcidException
+	 */
 	public void addWorks(AccessToken token, OrcidMessage message) throws OrcidException {
+		//TODO potentially streamline some of what is happening here!
 		if (message != null && token != null) {
 			String authorizationStr =  getAuthorizationString(token);
 			LOGGER.info("Authorization String: {}", authorizationStr);
@@ -151,6 +210,12 @@ public class OAuthAuthenticator {
 		}
 	}
 	
+	/**
+	 * Generate the authorization string to be added to headers
+	 * 
+	 * @param token The access token from which to generate the authorization string
+	 * @return The authorizaiton string
+	 */
 	private String getAuthorizationString(AccessToken token) {
 		return token.getTokenType() + " " + token.getAccessToken();
 	}
@@ -164,7 +229,7 @@ public class OAuthAuthenticator {
 	public void updateWorks(AccessToken token, OrcidMessage message) throws OrcidException {
 		//TODO fetch works from orcid as well!
 		if (message != null && token != null) {
-
+			//TODO potentially streamline some of what is happening here!
 			String authorizationStr =  getAuthorizationString(token);
 			LOGGER.info("Authorization String: {}", authorizationStr);
 			Client client = getClient();
@@ -194,6 +259,13 @@ public class OAuthAuthenticator {
 		}
 	}
 	
+	/**
+	 * Retrieve the access token from orcid
+	 * 
+	 * @param authorizationCode The authorization code to use to generate the access token
+	 * @return The access token
+	 * @throws OAuthException
+	 */
 	public AccessToken getAccessTokenFromAuthorizationCode(String authorizationCode) throws OAuthException {
 		Client client = getClient();
 		client.property(ClientProperties.CONNECT_TIMEOUT, 60000);
@@ -220,23 +292,20 @@ public class OAuthAuthenticator {
 		}
 	}
 	
+	/**
+	 * Get the uri to redirect to so that an authorization code can be retrieved
+	 * 
+	 * @param scope The scope to generate a url for
+	 * @param redirectURI The uri to redirect to after the user has authenticated via oauth
+	 * @return The uri
+	 * @throws UnsupportedEncodingException
+	 */
 	public URI getAuthorizationCodeRequestUri(String scope, String redirectURI) throws UnsupportedEncodingException {
 		UriBuilder builder = UriBuilder.fromPath(orcidProperties_.getProperty("orcid.auth.uri")).path("oauth").path("authorize");
 		builder = builder. queryParam("client_id", clientId_);
 		builder = builder.queryParam("response_type", "code");
-		//String createWorks = URLEncoder.encode("/orcid-works/create", "UTF-8");
-		//String createWorks = URLEncoder.encode(scope, "UTF-8");
-		String createWorks = scope;
-	//	builder = builder.queryParam("scope", "/orcid-works/create");
-		builder = builder.queryParam("scope", createWorks);
-	//	redirectURI = "https://dc7-dev2.anu.edu.au/";
-	//	redirectURI = "https://developers.google.com/oauthplayground";
-		//redirectURI = URLEncoder.encode(redirectURI, "UTF-8");
-		//builder = builder.queryParam("redirect_uri", "https://developers.google.com/oauthplayground");
-	//	builder = builder.queryParam("redirect_uri", "http://dc7-dev2.anu.edu.au/orcid");
+		builder = builder.queryParam("scope", scope);
 		builder = builder.queryParam("redirect_uri", redirectURI);
-		//builder = builder.queryParam("redirect_uri", "https://developers.google.com/oauthplayground");
-		//builder = builder.queryParam("redirect_uri", redirectURI);
 		return builder.build();
 	}
 	

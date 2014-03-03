@@ -13,21 +13,27 @@ import au.edu.anu.orcid.process.retrieve.ObtainPersonInformation;
 import au.edu.anu.orcid.process.retrieve.ObtainPublicationInformation;
 import au.edu.anu.orcid.process.retrieve.UidObtainer;
 
+/**
+ * <p>ApplicationBinder</p>
+ *
+ * <p>The Australian National University</p>
+ *
+ * <p>Binds classes for injection</p>
+ *
+ * @author Genevieve Turner
+ *
+ */
 public class ApplicationBinder extends AbstractBinder {
 
 	@Override
 	protected void configure() {
 		bind(IdObtainer.class).to(IdObtainer.class);
 		bind(UidObtainer.class).to(UidObtainer.class);
-		//bind(PersonDAOImpl.class).to(PersonDAO.class);
 		bind(PersonDAOImpl.class).to(PersonDAO.class);
 		bind(ObtainMSPersonInformation.class).to(ObtainPersonInformation.class);
 		bind(ObtainMSPublicationInformation.class).to(ObtainPublicationInformation.class);
 		bind(PersonDAOImpl.class).to(PersonDAO.class);
 		bind(PublicationDAOImpl.class).to(PublicationDAO.class);
-		//bind(ObtainPersonInformation.class).to(ObtainInformation<Person, OrcidBio>);//.to(ObtainInformation<Person, OrcidBio>.class);
-		//bind(ObtainPersonInformation.class).;
-		//bind(ObtainPersonInformation.class).to
 	}
 
 }

@@ -1,3 +1,23 @@
+/*******************************************************************************
+ * Australian National University Orcid Updater
+ * Copyright (C) 2013  The Australian National University
+ * 
+ * This file is part of Australian National University Orcid Updater.
+ * 
+ * Australian National University Orcid Updater is free software: you
+ * can redistribute it and/or modify it under the terms of the GNU
+ * General Public License as published by the Free Software Foundation,
+ * either version 3 of the License, or (at your option) any later
+ * version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ ******************************************************************************/
 package au.edu.anu.orcid.db.model;
 
 import java.util.ArrayList;
@@ -32,6 +52,16 @@ import org.orcid.ns.orcid.OrcidBio;
 import org.orcid.ns.orcid.PersonalDetails;
 import org.orcid.ns.orcid.ResearcherUrls;
 
+/**
+ * <p>Person</p>
+ *
+ * <p>The Australian National University</p>
+ *
+ * <p>Entity class for the 'person' table</p>
+ *
+ * @author Genevieve Turner
+ *
+ */
 @Entity
 @Table(name="person")
 public class Person {
@@ -46,83 +76,171 @@ public class Person {
 	private List<EmailAddress> emailAddresses = new ArrayList<EmailAddress>();
 	private Set<Publication> orcidPublications = new HashSet<Publication>();
 	
+	/**
+	 * Constructor
+	 */
 	public Person() {
 		
 	}
 
+	/**
+	 * Get the id
+	 * 
+	 * @return The id
+	 */
 	@Id
 	@GeneratedValue(strategy=GenerationType.IDENTITY)
 	public Long getId() {
 		return id;
 	}
 
+	/**
+	 * Set the id
+	 * 
+	 * @param id The id
+	 */
 	public void setId(Long id) {
 		this.id = id;
 	}
 
+	/**
+	 * Get the external identifier
+	 * 
+	 * @return The external identifier
+	 */
 	@Column(name="external_id")
 	public String getExtId() {
 		return extId;
 	}
 
+	/**
+	 * Set the external identifier
+	 * 
+	 * @param extId The external identifier
+	 */
 	public void setExtId(String extId) {
 		this.extId = extId;
 	}
 
+	/**
+	 * Get the uid
+	 * 
+	 * @return The uid
+	 */
 	@Column(name="uid")
 	public String getUid() {
 		return uid;
 	}
 
+	/**
+	 * Set the uid
+	 * 
+	 * @param uid The uid
+	 */
 	public void setUid(String uid) {
 		this.uid = uid;
 	}
 
+	/**
+	 * Get the family name
+	 * 
+	 * @return The family name
+	 */
 	@Column(name="family_name")
 	public String getFamilyName() {
 		return familyName;
 	}
 
+	/**
+	 * Set the family name
+	 * 
+	 * @param familyName The family name
+	 */
 	public void setFamilyName(String familyName) {
 		this.familyName = familyName;
 	}
-
+	
+	/**
+	 * Get the given name
+	 * 
+	 * @return The given name
+	 */
 	@Column(name="given_name")
 	public String getGivenName() {
 		return givenName;
 	}
 
+	/**
+	 * Set the given name
+	 * 
+	 * @param givenName The given name
+	 */
 	public void setGivenName(String givenName) {
 		this.givenName = givenName;
 	}
 
+	/**
+	 * Get the credit name
+	 * 
+	 * @return The credit name
+	 */
 	@Column(name="credit_name")
 	public String getCreditName() {
 		return creditName;
 	}
 
+	/**
+	 * Set the credit name
+	 * 
+	 * @param creditName The credit name
+	 */
 	public void setCreditName(String creditName) {
 		this.creditName = creditName;
 	}
 
+	/**
+	 * Get the description
+	 * 
+	 * @return The description
+	 */
 	@Column(name="description")
 	public String getDescription() {
 		return description;
 	}
 
+	/**
+	 * Set the description
+	 * 
+	 * @param description The description
+	 */
 	public void setDescription(String description) {
 		this.description = description;
 	}
 
+	/**
+	 * Get the orcid
+	 * 
+	 * @return The orcid
+	 */
 	@Column(name="orcid")
 	public String getOrcid() {
 		return orcid;
 	}
 
+	/**
+	 * Set the orcid
+	 * 
+	 * @param orcid The orcid
+	 */
 	public void setOrcid(String orcid) {
 		this.orcid = orcid;
 	}
 
+	/**
+	 * Get the associated email address
+	 * 
+	 * @return The email addresses
+	 */
 	@OneToMany(fetch = FetchType.EAGER, mappedBy = "person")
 	@Cascade(CascadeType.ALL)
 	@NotFound(action=NotFoundAction.IGNORE)
@@ -130,10 +248,20 @@ public class Person {
 		return emailAddresses;
 	}
 
+	/**
+	 * Set the email addresses
+	 * 
+	 * @param emailAddresses The email addresses
+	 */
 	public void setEmailAddresses(List<EmailAddress> emailAddresses) {
 		this.emailAddresses = emailAddresses;
 	}
 	
+	/**
+	 * Get the associated publications
+	 * 
+	 * @return The publications
+	 */
 	//@ManyToMany(fetch = FetchType.LAZY, ma)
 	@ManyToMany(targetEntity=Publication.class)
 	@JoinTable(
@@ -145,10 +273,20 @@ public class Person {
 		return orcidPublications;
 	}
 
+	/**
+	 * Set the associated publications
+	 * 
+	 * @param orcidPublications The publications
+	 */
 	public void setOrcidPublications(Set<Publication> orcidPublications) {
 		this.orcidPublications = orcidPublications;
 	}
 	
+	/**
+	 * Get the person's BIO information
+	 * 
+	 * @return The biography
+	 */
 	@Transient
 	public OrcidBio getBio() {
 		OrcidBio bio = new OrcidBio();
@@ -163,6 +301,11 @@ public class Person {
 		return bio;
 	}
 
+	/**
+	 * Get the biography
+	 * 
+	 * @return The biography
+	 */
 	@Transient
 	private Biography getBiography() {
 		Biography biography = new Biography();
@@ -170,6 +313,11 @@ public class Person {
 		return biography;
 	}
 
+	/**
+	 * Get the contact details
+	 * 
+	 * @return The contact details
+	 */
 	@Transient
 	private ContactDetails getContactDetails() {
 		ContactDetails contactDetails = new ContactDetails();
@@ -184,16 +332,31 @@ public class Person {
 		return contactDetails;
 	}
 
+	/**
+	 * Get the external identifiers
+	 * 
+	 * @return The identifiers
+	 */
 	@Transient
 	private ExternalIdentifiers getIdentitifers() {
 		return null;
 	}
 
+	/**
+	 * Get the keywords
+	 * 
+	 * @return The keywords
+	 */
 	@Transient
 	private Keywords getKeywords() {
 		return null;
 	}
 
+	/**
+	 * Get the personal details
+	 * 
+	 * @return The personal details
+	 */
 	@Transient
 	private PersonalDetails getPersonalDetails() {
 		PersonalDetails personalDetails = new PersonalDetails();
@@ -205,6 +368,11 @@ public class Person {
 		return personalDetails;
 	}
 
+	/**
+	 * Get the research urls
+	 * 
+	 * @return The reseach urls
+	 */
 	@Transient
 	private ResearcherUrls getResearchUrls() {
 		return null;

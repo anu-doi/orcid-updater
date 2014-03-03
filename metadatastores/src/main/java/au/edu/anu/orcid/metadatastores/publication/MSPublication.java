@@ -122,7 +122,7 @@ public class MSPublication {
 	public Publication getPublication() {
 		Publication publication = new Publication();
 		
-		publication.setAriesId(this.getAriesId());
+		publication.setExternalIdentifier(this.getAriesId());
 		publication.setTitle(this.getTitle());
 		publication.setPublicationName(this.getPublicationName());
 		publication.setPublicationYear(this.getPublicationYear());

@@ -29,7 +29,14 @@ public abstract class ObtainPersonInformation implements ObtainInformation<Perso
 	
 	@Override
 	public Person get(String uid) {
+		LOGGER.info("UID: {}", uid);
 		Person person = personDAO.getPersonByUniId(uid);
+		if (person == null) {
+			LOGGER.info("Person is null for some reason?");
+		}
+		else {
+			LOGGER.info("Person is not null");
+		}
 		return person;
 	}
 	
