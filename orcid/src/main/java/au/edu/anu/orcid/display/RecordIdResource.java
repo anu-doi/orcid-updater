@@ -20,7 +20,6 @@
  ******************************************************************************/
 package au.edu.anu.orcid.display;
 
-import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.util.HashMap;
 import java.util.Map;
@@ -36,6 +35,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriBuilder;
 import javax.ws.rs.core.UriInfo;
+import javax.ws.rs.core.Response.Status;
 
 import org.glassfish.jersey.server.mvc.Viewable;
 import org.orcid.ns.orcid.OrcidMessage;
@@ -97,22 +97,70 @@ public class RecordIdResource {
 	 * @throws OAuthException
 	 */
 	@GET
-	@Path("/{id}/export/orcid")
+	@Path("/{id}/export/orcid/create")
 	public Response beginRecordUpdateRequest(@PathParam("id") Long id, @QueryParam("action") String action
 			, @Context UriInfo uriInfo) throws OAuthException {
-		Person person = obtainer.getPerson(id);
-		OAuthAuthenticator auth = new OAuthAuthenticator();
-		if (person.getOrcid() != null) {
-			LOGGER.info("User has an orcid: {}", person.getOrcid());
+		if ("find".equals(action)) {
+			URI createURI = getImportOrcidIdURI(id, uriInfo);
+			OAuthAuthenticator auth = new OAuthAuthenticator();
+			URI codeRequestURI = auth.getAuthorizationCodeRequestUri(OAuthConstants.PROFILE_READ, createURI.toString());
+
+			return Response.seeOther(codeRequestURI).build();
 		}
-		else {
+		else if ("create".equals(action)) {
+			Person person = obtainer.getPerson(id);
+			OAuthAuthenticator auth = new OAuthAuthenticator();
+
 			LOGGER.info("User needs to be created in orcid: {}", person.getUid());
 			OrcidMessage message = obtainer.getFullOrcidProfile(id);
 			String orcid = auth.createOrcid(message);
 			person.setOrcid(orcid);
 			obtainer.updatePerson(person);
+			
+			return Response.seeOther(getPageURI(id, uriInfo)).build();
+		}
+		return Response.status(Status.BAD_REQUEST).build();
+	}
+	
+	/**
+	 * Get the orcid from the authorization code
+	 * 
+	 * @param id The persons id
+	 * @param authorizationCode The authorization code
+	 * @param uriInfo The URI information
+	 * @return The response
+	 * @throws OAuthException
+	 */
+	@GET
+	@Produces(MediaType.TEXT_HTML)
+	@Path("/{id}/export/orcid/create/process")
+	public Response updateOrcid(@PathParam("id") Long id, @QueryParam("code") String authorizationCode, @Context UriInfo uriInfo) throws OAuthException {
+
+		LOGGER.debug("In process add works");
+		OAuthAuthenticator auth = new OAuthAuthenticator();
+		AccessToken token = auth.getAccessTokenFromAuthorizationCode(authorizationCode);
+		if (token.getOrcid() != null) {
+			LOGGER.info("Orcid {} for User {}", token.getOrcid(), id);
+			Person person = obtainer.getPerson(id);
+			person.setOrcid(token.getOrcid());
+			obtainer.updatePerson(person);
 		}
 		return Response.seeOther(getPageURI(id, uriInfo)).build();
+	}
+	
+	/**
+	 * Get the the URI to return to when attempting to find a users ORCID
+	 * 
+	 * @param uid The persons university id
+	 * @param uriInfo The URI information
+	 * @return The generated URI
+	 */
+	private URI getImportOrcidIdURI(Long id, UriInfo uriInfo) {
+		UriBuilder builder = UriBuilder.fromUri(uriInfo.getBaseUri());
+		builder.path("uid");
+		builder.path(id.toString());
+		builder.path("export").path("orcid").path("create/process");
+		return builder.build();
 	}
 	
 	/**
@@ -121,14 +169,13 @@ public class RecordIdResource {
 	 * @param id The id of the person to add works to
 	 * @param uriInfo The URI information
 	 * @return The response
-	 * @throws UnsupportedEncodingException
 	 */
 	@GET
 	@Produces(MediaType.TEXT_HTML)
 	@Path("/{id}/export/orcid/add-works")
 	public Response updateWorks(@PathParam("id") Long id, @Context UriInfo uriInfo) {
 		LOGGER.debug("In add works");
-		URI getRedirectURI = getUpdateRedirectURI(id, uriInfo);
+		URI getRedirectURI = getUpdateRedirectURI(id, uriInfo, "update-works/process");
 		LOGGER.info("Redirect URI {}", getRedirectURI.toString());
 		OAuthAuthenticator auth = new OAuthAuthenticator();
 		URI codeRequestURI = auth.getAuthorizationCodeRequestUri(OAuthConstants.WORKS_CREATE, getRedirectURI.toString());
@@ -150,13 +197,59 @@ public class RecordIdResource {
 	@GET
 	@Produces(MediaType.TEXT_HTML)
 	@Path("/{uid}/export/orcid/add-works/process")
-	public Response updateWorks(@PathParam("id") Long id, @QueryParam("code") String authorizationCode, @Context UriInfo uriInfo)
+	public Response addWorks(@PathParam("id") Long id, @QueryParam("code") String authorizationCode, @Context UriInfo uriInfo)
 			 throws OAuthException, OrcidException {
 		LOGGER.debug("In process add works");
 		OAuthAuthenticator auth = new OAuthAuthenticator();
 		AccessToken token = auth.getAccessTokenFromAuthorizationCode(authorizationCode);
 		OrcidMessage message = obtainer.getOrcidWorks(id);
 		LOGGER.debug("Adding Works");
+		auth.updateWorks(token, message);
+		LOGGER.debug("Works added");
+		return Response.seeOther(getPageURI(id, uriInfo)).build();
+	}
+	
+	/**
+	 * Begin the process of sending works to ORCID by redirecting to get an authorization code
+	 * 
+	 * @param id The id of the person to add works to
+	 * @param uriInfo The URI information
+	 * @return The response
+	 */
+	@GET
+	@Produces(MediaType.TEXT_HTML)
+	@Path("/{id}/export/orcid/update-works")
+	public Response addWorks(@PathParam("id") Long id, @Context UriInfo uriInfo) {
+		LOGGER.debug("In update works");
+		URI getRedirectURI = getUpdateRedirectURI(id, uriInfo, "update-works/process");
+		LOGGER.info("Redirect URI {}", getRedirectURI.toString());
+		OAuthAuthenticator auth = new OAuthAuthenticator();
+		URI codeRequestURI = auth.getAuthorizationCodeRequestUri(OAuthConstants.WORKS_READ + " " + OAuthConstants.WORKS_UPDATE, getRedirectURI.toString());
+		
+		LOGGER.info("URI to go to: {}", codeRequestURI);
+		return Response.seeOther(codeRequestURI).build();
+	}
+	
+	/**
+	 * Use the authorization code and update works to the persons ORCID profile
+	 * 
+	 * @param id The id of the person
+	 * @param authorizationCode The authorization code
+	 * @param uriInfo The URI information
+	 * @return The response
+	 * @throws OAuthException
+	 * @throws OrcidException
+	 */
+	@GET
+	@Produces(MediaType.TEXT_HTML)
+	@Path("/{uid}/export/orcid/update-works/process")
+	public Response updateWorks(@PathParam("id") Long id, @QueryParam("code") String authorizationCode, @Context UriInfo uriInfo)
+			 throws OAuthException, OrcidException {
+		LOGGER.debug("In process update works");
+		OAuthAuthenticator auth = new OAuthAuthenticator();
+		AccessToken token = auth.getAccessTokenFromAuthorizationCode(authorizationCode);
+		OrcidMessage message = obtainer.getOrcidWorks(id);
+		LOGGER.debug("Updating Works");
 		auth.addWorks(token, message);
 		LOGGER.debug("Works added");
 		return Response.seeOther(getPageURI(id, uriInfo)).build();
@@ -183,11 +276,11 @@ public class RecordIdResource {
 	 * @param uriInfo The URI information
 	 * @return The URI
 	 */
-	private URI getUpdateRedirectURI(Long id, UriInfo uriInfo) {
+	private URI getUpdateRedirectURI(Long id, UriInfo uriInfo, String extraPath) {
 		UriBuilder builder = UriBuilder.fromUri(uriInfo.getBaseUri());
 		builder.path("id");
 		builder.path(id.toString());
-		builder.path("export").path("orcid").path("add-works/process");
+		builder.path("export").path("orcid").path(extraPath);
 		
 		return builder.build();
 	}

@@ -30,4 +30,14 @@ public class OAuthConstants {
 	 * Update works scope
 	 */
 	public static final String WORKS_UPDATE = "/orcid-works/update";
+	
+	/**
+	 * Read Limited Profile scope
+	 */
+	public static final String PROFILE_READ = "/orcid-profile/read-limited";
+	
+	/**
+	 * Read Limited scope
+	 */
+	public static final String WORKS_READ = "/orcid-works/read-limited";
 }

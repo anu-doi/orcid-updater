@@ -22,6 +22,8 @@ package au.edu.anu.orcid.auth.orcid;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -34,9 +36,13 @@ import javax.ws.rs.core.Form;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriBuilder;
+import javax.xml.bind.JAXBElement;
 
 import org.glassfish.jersey.client.ClientProperties;
+import org.orcid.ns.orcid.OrcidActivities;
 import org.orcid.ns.orcid.OrcidMessage;
+import org.orcid.ns.orcid.OrcidWork;
+import org.orcid.ns.orcid.OrcidWorks;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -200,13 +206,7 @@ public class OAuthAuthenticator {
 			}
 		}
 		else {
-			LOGGER.info("Either the message or token is null");
-			if (message == null) {
-				LOGGER.info("Message is null");
-			}
-			if (token == null) {
-				LOGGER.info("Token is null");
-			}
+			generateNullMessageOrToken(message, token);
 		}
 	}
 	
@@ -227,19 +227,27 @@ public class OAuthAuthenticator {
 	 * @param message
 	 */
 	public void updateWorks(AccessToken token, OrcidMessage message) throws OrcidException {
-		//TODO fetch works from orcid as well!
 		if (message != null && token != null) {
 			//TODO potentially streamline some of what is happening here!
 			String authorizationStr =  getAuthorizationString(token);
 			LOGGER.info("Authorization String: {}", authorizationStr);
 			Client client = getClient();
+			
 			WebTarget target = client.target(orcidProperties_.getProperty("orcid.version.api.uri")).path(token.getOrcid()).path("orcid-works");
-			LOGGER.info("Sending Update Works request to orcid.  URL: {}", target.getUri());
-			Response response = target.request().accept(MediaType.APPLICATION_XML).header("Authorization", authorizationStr).put(Entity.entity(message, "application/orcid+xml"));
+			Response response = target.request().accept(MediaType.APPLICATION_XML).header("Authorization", authorizationStr).get();
 			if (response.getStatus() == 200) {
-				LOGGER.info("Status is: {}", response.getStatus());
+				OrcidMessage readWorksMessage = response.readEntity(OrcidMessage.class);
+				processReadWorksMessage(message, readWorksMessage);
+			}
+			else {
+				throw new OrcidException("Unable to read users works");
+			}
+			
+			LOGGER.info("Sending Update Works request to orcid.  URL: {}", target.getUri());
+			response = target.request().accept(MediaType.APPLICATION_XML).header("Authorization", authorizationStr).put(Entity.entity(message, "application/orcid+xml"));
+			if (response.getStatus() == 200) {
 				//Do nothing
-				LOGGER.info("Works added successfully");
+				LOGGER.info("Works updated successfully");
 			}
 			else {
 				LOGGER.error("Error adding works. Status Code: {}", response.getStatus());
@@ -249,13 +257,53 @@ public class OAuthAuthenticator {
 			}
 		}
 		else {
-			LOGGER.info("Either the message or token is null");
-			if (message == null) {
-				LOGGER.info("Message is null");
+			generateNullMessageOrToken(message, token);
+		}
+	}
+	
+	/**
+	 * Adds works that have been read from Orcid to the message to send through to update
+	 * 
+	 * @param message The orcid message to send to orcid
+	 * @param readWorksMessage The orcid message read from orcid
+	 */
+	private void processReadWorksMessage(OrcidMessage message, OrcidMessage readWorksMessage) {
+		OrcidActivities activities = readWorksMessage.getOrcidProfile().getOrcidActivities();
+		OrcidWorks readOrcidWorks = activities.getOrcidWorks();
+		if (readOrcidWorks != null) {
+			List<OrcidWork> worksToAdd = new ArrayList<OrcidWork>();
+			for (OrcidWork work : readOrcidWorks.getOrcidWork()) {
+				List<JAXBElement<String>> sourceVals = work.getWorkSource().getContent();
+				for (JAXBElement<String> element : sourceVals) {
+					if ("path".equals(element.getName().getLocalPart())) {
+						if (!clientId_.equals(element.getValue())) {
+							worksToAdd.add(work);
+						}
+					}
+				}
 			}
-			if (token == null) {
-				LOGGER.info("Token is null");
-			}
+			LOGGER.debug("Number of works to add: {}", worksToAdd.size());
+			message.getOrcidProfile().getOrcidActivities().getOrcidWorks().getOrcidWork().addAll(worksToAdd);
+		}
+	}
+	
+	/**
+	 * Generate an exception because either the Orcid Message or the Access Token objects are null.
+	 * 
+	 * @param message The Orcid Message
+	 * @param token The Acces Token
+	 * @throws OrcidException
+	 */
+	private void generateNullMessageOrToken(OrcidMessage message, AccessToken token) throws OrcidException {
+		LOGGER.info("Either the message or token is null");
+		if (message == null && token == null) {
+			throw new OrcidException("Orcid Message and Access Token are null");
+		}
+		if (message == null) {
+			throw new OrcidException("Orcid Message is null");
+		}
+		if (token == null) {
+			throw new OrcidException("Access Token is null");
 		}
 	}
 	

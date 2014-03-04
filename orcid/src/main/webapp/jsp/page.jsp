@@ -38,10 +38,12 @@
 	<ul class="nobullet">
 		<c:if test="${not empty it.orcid}">
 			<li><a href='<c:url value="/rest/uid/${it.extid}/export/orcid/add-works" />'>Export Publications to Orcid</a></li>
+			<li><a href='<c:url value="/rest/uid/${it.extid}/export/orcid/update-works" />'>Update Publications in Orcid</a></li>
 			
 		</c:if>
 		<c:if test="${empty it.orcid}">
-			<li><a href='<c:url value="/rest/uid/${it.extid}/export/orcid/create" />'>Create Orcid Profile</a></li>
+			<li><a href='<c:url value="/rest/uid/${it.extid}/export/orcid/create?action=find" />'>Link Existing Orcid Profile</a></li>
+			<li><a href='<c:url value="/rest/uid/${it.extid}/export/orcid/create?action=create" />'>Create Orcid Profile</a></li>
 		</c:if>
 		<li><a href='<c:url value="/rest/uid/${it.extid}/import" />'>Re-import Record</a></li>
 	</ul>
