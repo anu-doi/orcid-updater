@@ -26,6 +26,7 @@ import java.util.Map;
 
 import javax.inject.Inject;
 import javax.ws.rs.GET;
+import javax.ws.rs.NotFoundException;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
@@ -43,7 +44,6 @@ import org.orcid.ns.orcid.OrcidMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Scope;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Component;
 
 import au.edu.anu.orcid.auth.orcid.AccessToken;
@@ -52,7 +52,9 @@ import au.edu.anu.orcid.auth.orcid.OAuthConstants;
 import au.edu.anu.orcid.auth.orcid.OAuthException;
 import au.edu.anu.orcid.auth.orcid.OrcidException;
 import au.edu.anu.orcid.db.model.Person;
+import au.edu.anu.orcid.process.retrieve.NoRecordException;
 import au.edu.anu.orcid.process.retrieve.UidObtainer;
+import au.edu.anu.orcid.security.permission.PermissionService;
 
 /**
  * <p>RecordUidResource</p>
@@ -74,6 +76,9 @@ public class RecordUidResource {
 	@Inject
 	UidObtainer uidObtainer;
 	
+	@Inject
+	PermissionService permissionService;
+	
 	/**
 	 * Get the page that displays the users information
 	 * 
@@ -83,10 +88,10 @@ public class RecordUidResource {
 	@GET
 	@Produces(MediaType.TEXT_HTML)
 	@Path("/{uid}")
-	@PreAuthorize("#uid == authentication.name")
-	public Response getPage(@PathParam("uid") String uid) {
+	public Response getPage(@PathParam("uid") String uid) throws NoRecordException {
 		LOGGER.info("Attempting to find record for: {}", uid);
 		Person person = uidObtainer.getPerson(uid);
+		permissionService.checkPerson(person);
 		OrcidMessage message = uidObtainer.getFullOrcidProfile(uid);
 		Map<String, Object> model = new HashMap<String, Object>();
 		model.put("message", message);
@@ -109,8 +114,10 @@ public class RecordUidResource {
 	@Produces(MediaType.TEXT_HTML)
 	@Path("/{uid}/export/orcid/create")
 	public Response beginRecordUpdateRequest(@PathParam("uid") String uid, @QueryParam("action") String action
-			, @Context UriInfo uriInfo) throws OAuthException {
-		
+			, @Context UriInfo uriInfo) throws OAuthException, NoRecordException {
+
+		Person person = uidObtainer.getPerson(uid);
+		permissionService.checkPerson(person);
 		if ("find".equals(action)) {
 			URI createURI = getImportOrcidIdURI(uid, uriInfo);
 			OAuthAuthenticator auth = new OAuthAuthenticator();
@@ -119,7 +126,6 @@ public class RecordUidResource {
 			return Response.seeOther(codeRequestURI).build();
 		}
 		else if ("create".equals(action)) {
-			Person person = uidObtainer.getPerson(uid);
 			OAuthAuthenticator auth = new OAuthAuthenticator();
 
 			LOGGER.info("User needs to be created in orcid: {}", person.getUid());
@@ -145,14 +151,15 @@ public class RecordUidResource {
 	@GET
 	@Produces(MediaType.TEXT_HTML)
 	@Path("/{uid}/export/orcid/create/process")
-	public Response updateOrcid(@PathParam("uid") String uid, @QueryParam("code") String authorizationCode, @Context UriInfo uriInfo) throws OAuthException {
-
+	public Response updateOrcid(@PathParam("uid") String uid, @QueryParam("code") String authorizationCode
+			, @Context UriInfo uriInfo) throws OAuthException, NoRecordException {
 		LOGGER.debug("In process add works");
+		Person person = uidObtainer.getPerson(uid);
+		permissionService.checkPerson(person);
 		OAuthAuthenticator auth = new OAuthAuthenticator();
 		AccessToken token = auth.getAccessTokenFromAuthorizationCode(authorizationCode);
 		if (token.getOrcid() != null) {
 			LOGGER.info("Orcid {} for User {}", token.getOrcid(), uid);
-			Person person = uidObtainer.getPerson(uid);
 			person.setOrcid(token.getOrcid());
 			uidObtainer.updatePerson(person);
 		}
@@ -184,8 +191,10 @@ public class RecordUidResource {
 	@GET
 	@Produces(MediaType.TEXT_HTML)
 	@Path("/{uid}/export/orcid/add-works")
-	public Response addWorks(@PathParam("uid") String uid, @Context UriInfo uriInfo) {
+	public Response addWorks(@PathParam("uid") String uid, @Context UriInfo uriInfo) throws NoRecordException {
 		LOGGER.debug("In add works");
+		Person person = uidObtainer.getPerson(uid);
+		permissionService.checkPerson(person);
 		URI getRedirectURI = getUpdateRedirectURI(uid, uriInfo, "add-works/process");
 		LOGGER.info("Redirect URI {}", getRedirectURI.toString());
 		OAuthAuthenticator auth = new OAuthAuthenticator();
@@ -209,11 +218,14 @@ public class RecordUidResource {
 	@Produces(MediaType.TEXT_HTML)
 	@Path("/{uid}/export/orcid/add-works/process")
 	public Response addWorks(@PathParam("uid") String uid, @QueryParam("code") String authorizationCode, @Context UriInfo uriInfo)
-			 throws OAuthException, OrcidException {
+			 throws OAuthException, OrcidException, NoRecordException {
 		LOGGER.debug("In process add works");
+		Person person = uidObtainer.getPerson(uid);
+		permissionService.checkPerson(person);
+		OrcidMessage message = uidObtainer.getOrcidWorks(uid);
+		LOGGER.info("WHy has this gotten here?");
 		OAuthAuthenticator auth = new OAuthAuthenticator();
 		AccessToken token = auth.getAccessTokenFromAuthorizationCode(authorizationCode);
-		OrcidMessage message = uidObtainer.getOrcidWorks(uid);
 		LOGGER.debug("Adding Works");
 		auth.addWorks(token, message);
 		LOGGER.debug("Works added");
@@ -230,8 +242,10 @@ public class RecordUidResource {
 	@GET
 	@Produces(MediaType.TEXT_HTML)
 	@Path("/{uid}/export/orcid/update-works")
-	public Response updateWorks(@PathParam("uid") String uid, @Context UriInfo uriInfo) {
+	public Response updateWorks(@PathParam("uid") String uid, @Context UriInfo uriInfo) throws NoRecordException {
 		LOGGER.debug("In update works");
+		Person person = uidObtainer.getPerson(uid);
+		permissionService.checkPerson(person);
 		URI getRedirectURI = getUpdateRedirectURI(uid, uriInfo, "update-works/process");
 		LOGGER.info("Redirect URI {}", getRedirectURI.toString());
 		OAuthAuthenticator auth = new OAuthAuthenticator();
@@ -254,9 +268,11 @@ public class RecordUidResource {
 	@GET
 	@Produces(MediaType.TEXT_HTML)
 	@Path("/{uid}/export/orcid/update-works/process")
-	public Response updateWorks(@PathParam("uid") String uid, @QueryParam("code") String authorizationCode, @Context UriInfo uriInfo)
-			 throws OAuthException, OrcidException {
+	public Response updateWorks(@PathParam("uid") String uid, @QueryParam("code") String authorizationCode
+			, @Context UriInfo uriInfo) throws OAuthException, OrcidException, NoRecordException {
 		LOGGER.debug("In process update works");
+		Person person = uidObtainer.getPerson(uid);
+		permissionService.checkPerson(person);
 		OAuthAuthenticator auth = new OAuthAuthenticator();
 		AccessToken token = auth.getAccessTokenFromAuthorizationCode(authorizationCode);
 		OrcidMessage message = uidObtainer.getOrcidWorks(uid);
@@ -291,7 +307,6 @@ public class RecordUidResource {
 		UriBuilder builder = UriBuilder.fromUri(uriInfo.getBaseUri());
 		builder.path("uid");
 		builder.path(uid);
-		//builder.path("export").path("orcid").path("add-works/process");
 		builder.path("export").path("orcid").path(extraPath);
 		
 		return builder.build();

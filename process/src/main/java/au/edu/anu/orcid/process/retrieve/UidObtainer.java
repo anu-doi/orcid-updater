@@ -65,7 +65,7 @@ public class UidObtainer implements Obtainer<String> {
 	}
 
 	@Override
-	public OrcidMessage getOrcidWorks(String uid) {
+	public OrcidMessage getOrcidWorks(String uid) throws NoRecordException {
 		OrcidMessage message = new OrcidMessage();
 		message.setMessageVersion("1.1");
 		OrcidProfile profile = new OrcidProfile();
@@ -74,6 +74,9 @@ public class UidObtainer implements Obtainer<String> {
 			OrcidActivities activities = new OrcidActivities();
 			activities.setOrcidWorks(works);
 			profile.setOrcidActivities(activities);
+		}
+		else {
+			throw new NoRecordException("There are no works to send to Orcid");
 		}
 		message.setOrcidProfile(profile);
 		
@@ -134,8 +137,12 @@ public class UidObtainer implements Obtainer<String> {
 	}
 
 	@Override
-	public Person getPerson(String uid) {
-		return personOI.get(uid);
+	public Person getPerson(String uid) throws NoRecordException {
+		Person person = personOI.get(uid);
+		if (person == null) {
+			throw new NoRecordException("There is no user with the given uid: " + uid);
+		}
+		return person;
 	}
 
 	@Override

@@ -65,7 +65,7 @@ public class IdObtainer implements Obtainer<Long> {
 	}
 
 	@Override
-	public OrcidMessage getOrcidWorks(Long id) {
+	public OrcidMessage getOrcidWorks(Long id) throws NoRecordException {
 		OrcidMessage message = new OrcidMessage();
 		message.setMessageVersion("1.1");
 		OrcidProfile profile = new OrcidProfile();
@@ -74,6 +74,9 @@ public class IdObtainer implements Obtainer<Long> {
 			OrcidActivities activities = new OrcidActivities();
 			activities.setOrcidWorks(works);
 			profile.setOrcidActivities(activities);
+		}
+		else {
+			throw new NoRecordException("There are no works to send to Orcid");
 		}
 		message.setOrcidProfile(profile);
 		
@@ -133,8 +136,12 @@ public class IdObtainer implements Obtainer<Long> {
 	}
 
 	@Override
-	public Person getPerson(Long id) {
-		return personOI.get(id);
+	public Person getPerson(Long id) throws NoRecordException {
+		Person person = personOI.get(id);
+		if (person == null) {
+			throw new NoRecordException("There is no user with the given id: " + id.toString());
+		}
+		return person;
 	}
 
 	@Override

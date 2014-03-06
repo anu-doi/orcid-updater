@@ -49,16 +49,18 @@ public interface Obtainer<T> {
 	 * 
 	 * @param id The id
 	 * @return An orcid message containing the works information
+	 * @throws NoRecordException
 	 */
-	public OrcidMessage getOrcidWorks(T id);
+	public OrcidMessage getOrcidWorks(T id) throws NoRecordException;
 	
 	/**
 	 * Get the person object for the given id
 	 * 
 	 * @param id The id
 	 * @return The Person
+	 * @throws NoRecordException
 	 */
-	public Person getPerson(T id);
+	public Person getPerson(T id) throws NoRecordException;
 	
 	/**
 	 * Fetch the information about the person from an external source and save it

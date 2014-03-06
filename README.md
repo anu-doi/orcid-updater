@@ -3,9 +3,9 @@
 
 Application to update researchers profiles in orcid.
 
-Please note that this currently is a proof of concept/demonstrator application.
+__Please note that this currently is a proof of concept/demonstrator application.__
 
-This is a system allows users from the Australian National University to link their Orcid Id's, create a new Orcid Record, and Add to/Update publications in Orcid.
+This is system allows users from the Australian National University to link their Orcid Id's, create a new Orcid Record, and Add to/Update publications in Orcid.
 
 ##Personal Customisation
 To customise this application you will need to as a minimum perform the following steps:

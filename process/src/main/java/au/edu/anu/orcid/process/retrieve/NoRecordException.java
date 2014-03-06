@@ -18,42 +18,37 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  ******************************************************************************/
-package au.edu.anu.orcid.config;
-
-import javax.ws.rs.ApplicationPath;
-
-import org.glassfish.jersey.server.ResourceConfig;
-import org.glassfish.jersey.server.mvc.jsp.JspMvcFeature;
-import org.springframework.web.filter.RequestContextFilter;
-
-import au.edu.anu.orcid.display.RecordIdResource;
-import au.edu.anu.orcid.display.RecordUidResource;
-import au.edu.anu.orcid.exception.AccessDeniedExceptionMapper;
-import au.edu.anu.orcid.exception.NoRecordExceptionMapper;
+package au.edu.anu.orcid.process.retrieve;
 
 /**
- * <p>ApplicationConfig</p>
+ * <p>NoRecordException</p>
  *
  * <p>The Australian National University</p>
  *
- * <p>Configures information for jersey start up</p>
+ * <p>Exception to indicate that there were no records found for the given request</p>
  *
  * @author Genevieve Turner
  *
  */
-@ApplicationPath("/rest")
-public class ApplicationConfig extends ResourceConfig {
-	public ApplicationConfig() {
-		//  Resources
-		packages(RecordIdResource.class.getPackage().getName(), RecordUidResource.class.getPackage().getName()
-				, AccessDeniedExceptionMapper.class.getPackage().getName()
-				, NoRecordExceptionMapper.class.getPackage().getName(), "au.edu.anu.orcid");
-		
-		// MVC
-		register(RequestContextFilter.class);
-		register(JspMvcFeature.class);
-		register(new ApplicationBinder());
-		// Logging
-		//register(LoggingFilter.class);
+public class NoRecordException extends Exception {
+	private static final long serialVersionUID = 1L;
+
+	/**
+	 * Constructor
+	 * 
+	 * @param message The error message
+	 */
+	public NoRecordException(String message) {
+		super(message);
+	}
+	
+	/**
+	 * Constructor
+	 * 
+	 * @param message The error message
+	 * @param throwable The throwable for the error
+	 */
+	public NoRecordException(String message, Throwable throwable) {
+		super(message, throwable);
 	}
 }
