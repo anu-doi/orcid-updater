@@ -1,0 +1,17 @@
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+	xmlns:context="http://www.springframework.org/schema/context"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans
+	http://www.springframework.org/schema/beans/spring-beans-3.2.xsd 
+	http://www.springframework.org/schema/context
+	http://www.springframework.org/schema/context/spring-context-3.2.xsd">
+	
+	<!--  Jersey spring seems to expect this file... -->
+	<bean class="au.edu.anu.orcid.process.retrieve.UidObtainer" id="uidObtainer" />
+	<bean class="au.edu.anu.orcid.process.retrieve.IdObtainer" id="idObtainer" />
+	<bean class="au.edu.anu.orcid.metadatastores.retrieve.ObtainMSPersonInformation" id="personOI" />
+	<bean class="au.edu.anu.orcid.metadatastores.retrieve.ObtainMSPublicationInformation" id="pubOI" />
+	<bean class="au.edu.anu.orcid.db.dao.impl.PublicationDAOImpl" id="publicationDAO" />
+	<bean class="au.edu.anu.orcid.db.dao.impl.PersonDAOImpl" id="personDAO" />
+	<bean class="au.edu.anu.orcid.security.permission.PermissionServiceImpl" id="permissionService" />
+</beans>

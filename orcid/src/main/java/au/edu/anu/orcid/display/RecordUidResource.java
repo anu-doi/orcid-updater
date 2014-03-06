@@ -37,10 +37,14 @@ import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriBuilder;
 import javax.ws.rs.core.UriInfo;
 
+import org.glassfish.jersey.server.mvc.Template;
 import org.glassfish.jersey.server.mvc.Viewable;
 import org.orcid.ns.orcid.OrcidMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.annotation.Scope;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.stereotype.Component;
 
 import au.edu.anu.orcid.auth.orcid.AccessToken;
 import au.edu.anu.orcid.auth.orcid.OAuthAuthenticator;
@@ -60,12 +64,15 @@ import au.edu.anu.orcid.process.retrieve.UidObtainer;
  * @author Genevieve Turner
  *
  */
+@Component
+@Scope("request")
 @Path("/uid")
+@Template
 public class RecordUidResource {
 	static final Logger LOGGER = LoggerFactory.getLogger(RecordUidResource.class);
 	
 	@Inject
-	UidObtainer obtainer;
+	UidObtainer uidObtainer;
 	
 	/**
 	 * Get the page that displays the users information
@@ -76,10 +83,11 @@ public class RecordUidResource {
 	@GET
 	@Produces(MediaType.TEXT_HTML)
 	@Path("/{uid}")
+	@PreAuthorize("#uid == authentication.name")
 	public Response getPage(@PathParam("uid") String uid) {
 		LOGGER.info("Attempting to find record for: {}", uid);
-		Person person = obtainer.getPerson(uid);
-		OrcidMessage message = obtainer.getFullOrcidProfile(uid);
+		Person person = uidObtainer.getPerson(uid);
+		OrcidMessage message = uidObtainer.getFullOrcidProfile(uid);
 		Map<String, Object> model = new HashMap<String, Object>();
 		model.put("message", message);
 		model.put("orcid", person.getOrcid());
@@ -111,14 +119,14 @@ public class RecordUidResource {
 			return Response.seeOther(codeRequestURI).build();
 		}
 		else if ("create".equals(action)) {
-			Person person = obtainer.getPerson(uid);
+			Person person = uidObtainer.getPerson(uid);
 			OAuthAuthenticator auth = new OAuthAuthenticator();
 
 			LOGGER.info("User needs to be created in orcid: {}", person.getUid());
-			OrcidMessage message = obtainer.getFullOrcidProfile(uid);
+			OrcidMessage message = uidObtainer.getFullOrcidProfile(uid);
 			String orcid = auth.createOrcid(message);
 			person.setOrcid(orcid);
-			obtainer.updatePerson(person);
+			uidObtainer.updatePerson(person);
 			
 			return Response.seeOther(getPageURI(uid, uriInfo)).build();
 		}
@@ -144,9 +152,9 @@ public class RecordUidResource {
 		AccessToken token = auth.getAccessTokenFromAuthorizationCode(authorizationCode);
 		if (token.getOrcid() != null) {
 			LOGGER.info("Orcid {} for User {}", token.getOrcid(), uid);
-			Person person = obtainer.getPerson(uid);
+			Person person = uidObtainer.getPerson(uid);
 			person.setOrcid(token.getOrcid());
-			obtainer.updatePerson(person);
+			uidObtainer.updatePerson(person);
 		}
 		return Response.seeOther(getPageURI(uid, uriInfo)).build();
 	}
@@ -205,7 +213,7 @@ public class RecordUidResource {
 		LOGGER.debug("In process add works");
 		OAuthAuthenticator auth = new OAuthAuthenticator();
 		AccessToken token = auth.getAccessTokenFromAuthorizationCode(authorizationCode);
-		OrcidMessage message = obtainer.getOrcidWorks(uid);
+		OrcidMessage message = uidObtainer.getOrcidWorks(uid);
 		LOGGER.debug("Adding Works");
 		auth.addWorks(token, message);
 		LOGGER.debug("Works added");
@@ -251,7 +259,7 @@ public class RecordUidResource {
 		LOGGER.debug("In process update works");
 		OAuthAuthenticator auth = new OAuthAuthenticator();
 		AccessToken token = auth.getAccessTokenFromAuthorizationCode(authorizationCode);
-		OrcidMessage message = obtainer.getOrcidWorks(uid);
+		OrcidMessage message = uidObtainer.getOrcidWorks(uid);
 		LOGGER.debug("Updating Works");
 		auth.updateWorks(token, message);
 		LOGGER.debug("Works added");
@@ -300,7 +308,7 @@ public class RecordUidResource {
 	@Produces(MediaType.TEXT_HTML)
 	@Path("/{uid}/import")
 	public Response updatePerson(@PathParam("uid") String uid, @Context UriInfo uriInfo) {
-		obtainer.fetchPerson(uid);
+		uidObtainer.fetchPerson(uid);
 		return Response.seeOther(getPageURI(uid, uriInfo)).build();
 	}
 	

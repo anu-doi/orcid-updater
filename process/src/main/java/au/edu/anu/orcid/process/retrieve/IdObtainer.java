@@ -30,6 +30,8 @@ import org.orcid.ns.orcid.OrcidMessage;
 import org.orcid.ns.orcid.OrcidProfile;
 import org.orcid.ns.orcid.OrcidWork;
 import org.orcid.ns.orcid.OrcidWorks;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import au.edu.anu.orcid.db.model.Person;
 
@@ -44,6 +46,7 @@ import au.edu.anu.orcid.db.model.Person;
  *
  */
 public class IdObtainer implements Obtainer<Long> {
+	static final Logger LOGGER = LoggerFactory.getLogger(UidObtainer.class);
 	
 	@Inject
 	ObtainPersonInformation personOI;
@@ -96,6 +99,9 @@ public class IdObtainer implements Obtainer<Long> {
 			OrcidActivities activities = new OrcidActivities();
 			activities.setOrcidWorks(works);
 			profile.setOrcidActivities(activities);
+		}
+		else {
+			LOGGER.info("No works found!");
 		}
 		return profile;
 	}

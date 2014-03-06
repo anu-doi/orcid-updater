@@ -326,7 +326,7 @@ public class OAuthAuthenticator {
 		form.param("code", authorizationCode);
 		
 		LOGGER.info("Exchange authorization");
-		Response response = target.request(MediaType.APPLICATION_JSON).post(Entity.entity(form, MediaType.APPLICATION_FORM_URLENCODED));
+		Response response = target.request().accept(MediaType.APPLICATION_JSON).post(Entity.entity(form, MediaType.APPLICATION_FORM_URLENCODED));
 		LOGGER.info("Authorization Exchanged.  Processing Response");
 		if (response.getStatus() == 200) {
 			AccessToken accessToken = response.readEntity(AccessToken.class);

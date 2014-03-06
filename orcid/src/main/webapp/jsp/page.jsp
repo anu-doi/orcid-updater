@@ -1,7 +1,7 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
 <%@ taglib prefix="anu" uri="http://www.anu.edu.au/taglib"%>
 
-<anu:header id="1998" title="${it.grant.title}" description="description" subject="subject" respOfficer="Doug Moncur" respOfficerContact="mailto:doug.moncur@anu.edu.au"
+<anu:header id="1998" title="${it.message.orcidProfile.orcidBio.personalDetails.creditName.value}" description="description" subject="subject" respOfficer="Doug Moncur" respOfficerContact="mailto:doug.moncur@anu.edu.au"
 	ssl="true">
 	<link rel="stylesheet" type="text/css" href="<c:url value='/css/academic.css' />" />
 	<script type="text/javascript" src="<c:url value='/js/academic.js' />"></script>

@@ -18,39 +18,26 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  ******************************************************************************/
-package au.edu.anu.orcid.config;
+package au.edu.anu.orcid.security;
 
-import javax.ws.rs.ApplicationPath;
-
-import org.glassfish.jersey.server.ResourceConfig;
-import org.glassfish.jersey.server.mvc.jsp.JspMvcFeature;
-import org.springframework.web.filter.RequestContextFilter;
-
-import au.edu.anu.orcid.display.RecordIdResource;
-import au.edu.anu.orcid.display.RecordUidResource;
-import au.edu.anu.orcid.exception.AccessDeniedExceptionMapper;
+import org.springframework.security.web.context.AbstractSecurityWebApplicationInitializer;
 
 /**
- * <p>ApplicationConfig</p>
+ * <p>SecurityWebApplicationInitializer</p>
  *
  * <p>The Australian National University</p>
  *
- * <p>Configures information for jersey start up</p>
+ * <p>Class to initialize the security configuration</p>
  *
  * @author Genevieve Turner
  *
  */
-@ApplicationPath("/rest")
-public class ApplicationConfig extends ResourceConfig {
-	public ApplicationConfig() {
-		//  Resources
-		packages(RecordIdResource.class.getPackage().getName(), RecordUidResource.class.getPackage().getName(), AccessDeniedExceptionMapper.class.getPackage().getName(), "au.edu.anu.orcid");
-		
-		// MVC
-		register(RequestContextFilter.class);
-		register(JspMvcFeature.class);
-		register(new ApplicationBinder());
-		// Logging
-		//register(LoggingFilter.class);
+public class SecurityWebApplicationInitializer extends
+		AbstractSecurityWebApplicationInitializer {
+	/**
+	 * Constructor
+	 */
+	public SecurityWebApplicationInitializer() {
+		super(SecurityConfig.class);
 	}
 }

@@ -26,6 +26,7 @@ import java.util.Map;
 
 import javax.inject.Inject;
 import javax.ws.rs.GET;
+import javax.ws.rs.NotFoundException;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
@@ -33,9 +34,9 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriBuilder;
 import javax.ws.rs.core.UriInfo;
-import javax.ws.rs.core.Response.Status;
 
 import org.glassfish.jersey.server.mvc.Viewable;
 import org.orcid.ns.orcid.OrcidMessage;
@@ -49,6 +50,7 @@ import au.edu.anu.orcid.auth.orcid.OAuthException;
 import au.edu.anu.orcid.auth.orcid.OrcidException;
 import au.edu.anu.orcid.db.model.Person;
 import au.edu.anu.orcid.process.retrieve.IdObtainer;
+import au.edu.anu.orcid.security.permission.PermissionService;
 
 /**
  * <p>RecordIdResource</p>
@@ -65,7 +67,10 @@ public class RecordIdResource {
 	static final Logger LOGGER = LoggerFactory.getLogger(RecordIdResource.class);
 	
 	@Inject
-	IdObtainer obtainer;
+	IdObtainer idObtainer;
+	
+	@Inject
+	PermissionService permissionService;
 	
 	/**
 	 * Get the page that displays the users information
@@ -77,8 +82,13 @@ public class RecordIdResource {
 	@Path("/{id}")
 	public Response getPage(@PathParam("id") Long id) {
 		LOGGER.info("Attempting to find record for: {}", id);
-		Person person = obtainer.getPerson(id);
-		OrcidMessage message = obtainer.getFullOrcidProfile(id);
+		//Person person = permissionService.getPerson(id);
+		Person person = idObtainer.getPerson(id);
+		if (person == null) {
+			throw new NotFoundException();
+		}
+		permissionService.checkPerson(person);
+		OrcidMessage message = idObtainer.getFullOrcidProfile(id);
 		Map<String, Object> model = new HashMap<String, Object>();
 		model.put("message", message);
 		model.put("orcid",  person.getOrcid());
@@ -100,6 +110,10 @@ public class RecordIdResource {
 	@Path("/{id}/export/orcid/create")
 	public Response beginRecordUpdateRequest(@PathParam("id") Long id, @QueryParam("action") String action
 			, @Context UriInfo uriInfo) throws OAuthException {
+		Person person = idObtainer.getPerson(id);
+		if (person == null) {
+			throw new NotFoundException();
+		}
 		if ("find".equals(action)) {
 			URI createURI = getImportOrcidIdURI(id, uriInfo);
 			OAuthAuthenticator auth = new OAuthAuthenticator();
@@ -108,14 +122,13 @@ public class RecordIdResource {
 			return Response.seeOther(codeRequestURI).build();
 		}
 		else if ("create".equals(action)) {
-			Person person = obtainer.getPerson(id);
 			OAuthAuthenticator auth = new OAuthAuthenticator();
 
 			LOGGER.info("User needs to be created in orcid: {}", person.getUid());
-			OrcidMessage message = obtainer.getFullOrcidProfile(id);
+			OrcidMessage message = idObtainer.getFullOrcidProfile(id);
 			String orcid = auth.createOrcid(message);
 			person.setOrcid(orcid);
-			obtainer.updatePerson(person);
+			idObtainer.updatePerson(person);
 			
 			return Response.seeOther(getPageURI(id, uriInfo)).build();
 		}
@@ -135,15 +148,17 @@ public class RecordIdResource {
 	@Produces(MediaType.TEXT_HTML)
 	@Path("/{id}/export/orcid/create/process")
 	public Response updateOrcid(@PathParam("id") Long id, @QueryParam("code") String authorizationCode, @Context UriInfo uriInfo) throws OAuthException {
-
+		Person person = idObtainer.getPerson(id);
+		if (person == null) {
+			throw new NotFoundException();
+		}
 		LOGGER.debug("In process add works");
 		OAuthAuthenticator auth = new OAuthAuthenticator();
 		AccessToken token = auth.getAccessTokenFromAuthorizationCode(authorizationCode);
 		if (token.getOrcid() != null) {
 			LOGGER.info("Orcid {} for User {}", token.getOrcid(), id);
-			Person person = obtainer.getPerson(id);
 			person.setOrcid(token.getOrcid());
-			obtainer.updatePerson(person);
+			idObtainer.updatePerson(person);
 		}
 		return Response.seeOther(getPageURI(id, uriInfo)).build();
 	}
@@ -175,6 +190,10 @@ public class RecordIdResource {
 	@Path("/{id}/export/orcid/add-works")
 	public Response updateWorks(@PathParam("id") Long id, @Context UriInfo uriInfo) {
 		LOGGER.debug("In add works");
+		Person person = idObtainer.getPerson(id);
+		if (person == null) {
+			throw new NotFoundException();
+		}
 		URI getRedirectURI = getUpdateRedirectURI(id, uriInfo, "update-works/process");
 		LOGGER.info("Redirect URI {}", getRedirectURI.toString());
 		OAuthAuthenticator auth = new OAuthAuthenticator();
@@ -200,9 +219,13 @@ public class RecordIdResource {
 	public Response addWorks(@PathParam("id") Long id, @QueryParam("code") String authorizationCode, @Context UriInfo uriInfo)
 			 throws OAuthException, OrcidException {
 		LOGGER.debug("In process add works");
+		Person person = idObtainer.getPerson(id);
+		if (person == null) {
+			throw new NotFoundException();
+		}
 		OAuthAuthenticator auth = new OAuthAuthenticator();
 		AccessToken token = auth.getAccessTokenFromAuthorizationCode(authorizationCode);
-		OrcidMessage message = obtainer.getOrcidWorks(id);
+		OrcidMessage message = idObtainer.getOrcidWorks(id);
 		LOGGER.debug("Adding Works");
 		auth.updateWorks(token, message);
 		LOGGER.debug("Works added");
@@ -221,6 +244,10 @@ public class RecordIdResource {
 	@Path("/{id}/export/orcid/update-works")
 	public Response addWorks(@PathParam("id") Long id, @Context UriInfo uriInfo) {
 		LOGGER.debug("In update works");
+		Person person = idObtainer.getPerson(id);
+		if (person == null) {
+			throw new NotFoundException();
+		}
 		URI getRedirectURI = getUpdateRedirectURI(id, uriInfo, "update-works/process");
 		LOGGER.info("Redirect URI {}", getRedirectURI.toString());
 		OAuthAuthenticator auth = new OAuthAuthenticator();
@@ -246,9 +273,13 @@ public class RecordIdResource {
 	public Response updateWorks(@PathParam("id") Long id, @QueryParam("code") String authorizationCode, @Context UriInfo uriInfo)
 			 throws OAuthException, OrcidException {
 		LOGGER.debug("In process update works");
+		Person person = idObtainer.getPerson(id);
+		if (person == null) {
+			throw new NotFoundException();
+		}
 		OAuthAuthenticator auth = new OAuthAuthenticator();
 		AccessToken token = auth.getAccessTokenFromAuthorizationCode(authorizationCode);
-		OrcidMessage message = obtainer.getOrcidWorks(id);
+		OrcidMessage message = idObtainer.getOrcidWorks(id);
 		LOGGER.debug("Updating Works");
 		auth.addWorks(token, message);
 		LOGGER.debug("Works added");
@@ -295,7 +326,7 @@ public class RecordIdResource {
 	@GET
 	@Path("/{id}/import")
 	public Response updatePerson(@PathParam("id") Long id, @Context UriInfo uriInfo) {
-		obtainer.fetchPerson(id);
+		idObtainer.fetchPerson(id);
 		return Response.seeOther(getPageURI(id, uriInfo)).build();
 	}
 	

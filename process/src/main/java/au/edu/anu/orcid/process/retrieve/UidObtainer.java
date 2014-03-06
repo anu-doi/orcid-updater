@@ -79,7 +79,6 @@ public class UidObtainer implements Obtainer<String> {
 		
 		return message;
 	}
-
 	
 	/**
 	 * Get the persons  profile
