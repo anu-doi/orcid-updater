@@ -83,7 +83,8 @@ PersonDAO {
 		}
 		return null;
 	}
-	
+
+	@Override
 	public Person getPersonByUniIdWithOrcidPublications(String uniId) {
 		EntityManager em = PersistenceManager.getInstance().getEntityManagerFactory().createEntityManager();
 		try {

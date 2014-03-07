@@ -227,7 +227,8 @@ public class MSPublication {
 	}
 	
 	/**
-	 * Generate the Publication object
+	 * Transform the metadata stores publication object to a publication object suitable for saving to the 
+	 * orcid-update database.
 	 * 
 	 * @return The publication
 	 */
@@ -255,7 +256,7 @@ public class MSPublication {
 	 * @return The work type
 	 */
 	private String generateWorkType() {
-		//TODO logic around work types.... Need to map the category fields perhaps a properties file? for now just use type field
+		//TODO logic around work types.... Need to map the category fields perhaps a properties file or database table? for now just use type field
 		if ("Conference".equals(this.getType())) {
 			return "conference-paper";
 		}

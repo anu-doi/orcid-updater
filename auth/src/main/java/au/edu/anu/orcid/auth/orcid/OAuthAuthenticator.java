@@ -48,6 +48,17 @@ import org.slf4j.LoggerFactory;
 
 import au.edu.anu.orcid.util.PropertyLoader;
 
+/**
+ * <p>OAuthAuthenticator</p>
+ *
+ * <p>The Australian National University</p>
+ *
+ * <p>The OAuthAuthenticator has the classes that authenticate with OAuth to ORCiD.  The class also sends the messages to
+ * ORCiD.</p>
+ *
+ * @author Genevieve Turner
+ *
+ */
 public class OAuthAuthenticator {
 	static final Logger LOGGER = LoggerFactory.getLogger(OAuthAuthenticator.class);
 	private static Properties orcidProperties_ = PropertyLoader.loadProperties("orcid.properties");
@@ -76,6 +87,7 @@ public class OAuthAuthenticator {
 	 */
 	private Client getClient() {
 		if (client_ == null) {
+			LOGGER.debug("Creating client");
 			ClientBuilder clientBuilder = ClientBuilder.newBuilder();
 			// Ignore the hsotname if debug is set to true.
 			if ("true".equals(orcidProperties_.getProperty("debug"))) {
@@ -88,13 +100,15 @@ public class OAuthAuthenticator {
 	}
 	
 	/**
-	 * Create an orcid
+	 * Create a message in Orcid that contains the appropriate profile information (i.e. Biography, Works, etc).  The
+	 * message needs to have a minimum of a given name, family name, and primary email address.
 	 * 
 	 * @param message The message that will be sent to orcid to create the record
 	 * @return The orcid id
 	 * @throws OAuthException
 	 */
 	public String createOrcid(OrcidMessage message) throws OAuthException {
+		LOGGER.debug("In createOrcid");
 		if (message != null) {
 			String authorizationStr = getCreateCredentials();
 			LOGGER.info(authorizationStr);
@@ -110,33 +124,33 @@ public class OAuthAuthenticator {
 				boolean found = m.find();
 				if (found) {
 					String orcid = m.group(1);
-					LOGGER.info("Orcid: {}", orcid);
+					LOGGER.info("Created Orcid: {}", orcid);
 					return orcid;
 				}
 			}
 			else {
 				String textResponse = response.readEntity(String.class);
-				LOGGER.info("location is null. Response Status: {}", response.getStatus());
+				LOGGER.info("Location is null. Response Status: {}", response.getStatus());
 				LOGGER.info("Response: {}", textResponse);
-				throw new OAuthException("Exception creating orcid");
+				throw new OAuthException("There was an error while creating an ORCiD profile");
 			}
 			String textResponse = response.readEntity(String.class);
-			LOGGER.info("Response content: {}", textResponse);
+			LOGGER.debug("Response content: {}", textResponse);
 		}
 		else {
-			throw new OAuthException("No message to send");
+			throw new OAuthException("There is no message to send to ORCiD");
 		}
 		return null;
 	}
 	
 	/**
-	 * Get the create credentials
+	 * Authenticate the systems credentials with Orcid and generate an authorization string for creating new records.
 	 * 
 	 * @return The create credentials
 	 * @throws OAuthException
 	 */
 	private String getCreateCredentials() throws OAuthException {
-		LOGGER.info("In getCreateCredentials");
+		LOGGER.debug("In getCreateCredentials");
 		if (createToken_ == null) {
 			Client client = getClient();
 			WebTarget target = client.target(orcidProperties_.getProperty("orcid.api.uri")).path("oauth").path("token");
@@ -160,11 +174,12 @@ public class OAuthAuthenticator {
 			}
 		}
 		LOGGER.info("Create Authorization String: {}", createToken_.getTokenType() + " " + createToken_.getAccessToken());
-		return createToken_.getTokenType() + " " + createToken_.getAccessToken();
+		return getAuthorizationString(createToken_);
 	}
 	
 	/**
-	 * Add new works to the users list of publications in orcid
+	 * Add new works to the users list of publications in orcid.  Note: If there are no works in the mesage Orcid will return
+	 * an error response.
 	 * 
 	 * @param orcid The orcid id
 	 * @param message The message to add the works
@@ -179,7 +194,8 @@ public class OAuthAuthenticator {
 	}
 	
 	/**
-	 * Add new works to the users list of publications in orcid
+	 * <p>Add new works to the users list of publications in orcid.</p>
+	 * <p>Note: If there are no works in the message Orcid will return an error response.</p>
 	 * 
 	 * @param token The access token
 	 * @param message The message to add the works
@@ -211,20 +227,23 @@ public class OAuthAuthenticator {
 	}
 	
 	/**
-	 * Generate the authorization string to be added to headers
+	 * Generate the authorization string to be added to headers.
 	 * 
 	 * @param token The access token from which to generate the authorization string
-	 * @return The authorizaiton string
+	 * @return The authorization string
 	 */
 	private String getAuthorizationString(AccessToken token) {
 		return token.getTokenType() + " " + token.getAccessToken();
 	}
 	
 	/**
-	 * Please note that executing this will essentially remove all works and insert whatever is sent through via the message
+	 * <p>Update the works on the server.</p>
+	 * <p>Please note that at the time of development the update essentially removed all works and inserted whatever
+	 * was sent through via the message.  This includes records that are private data.  Orcid was/is working on fixing this.</p>
 	 * 
-	 * @param token
-	 * @param message
+	 * @param token The access token from which to generate the authorization string
+	 * @param message The message that contains the updates
+	 * @throws OrcidException
 	 */
 	public void updateWorks(AccessToken token, OrcidMessage message) throws OrcidException {
 		if (message != null && token != null) {
@@ -262,7 +281,9 @@ public class OAuthAuthenticator {
 	}
 	
 	/**
-	 * Adds works that have been read from Orcid to the message to send through to update
+	 * <p>This method adds the works that already exist in the users profile to the message that will be sent
+	 * to ORCiD</p>
+	 * <p>This is to reduce possible loss of the users publications</p>
 	 * 
 	 * @param message The orcid message to send to orcid
 	 * @param readWorksMessage The orcid message read from orcid
@@ -308,7 +329,8 @@ public class OAuthAuthenticator {
 	}
 	
 	/**
-	 * Retrieve the access token from orcid
+	 * <p>From the authorization code that has been retrieved by the system via the user logging in to ORCiD the
+	 * necessary actions are performed to get the access token from ORCiD.</p>
 	 * 
 	 * @param authorizationCode The authorization code to use to generate the access token
 	 * @return The access token

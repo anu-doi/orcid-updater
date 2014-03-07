@@ -31,7 +31,7 @@ import org.slf4j.LoggerFactory;
  *
  * <p>The Australian National University</p>
  *
- * <p>Persistence Manager that deals with the creation and descruction of the Entity Manager Factory</p>
+ * <p>Persistence Manager that deals with the creation and destruction of the Entity Manager Factory</p>
  *
  * @author Genevieve Turner
  *
@@ -43,14 +43,27 @@ public class PersistenceManager {
 	
 	protected EntityManagerFactory emf;
 	
+	/**
+	 * Get an instance of the persistence manager
+	 * 
+	 * @return
+	 */
 	public static PersistenceManager getInstance() {
 		return singleton_;
 	}
 	
+	/**
+	 * Constructor
+	 */
 	private PersistenceManager() {
 		
 	}
 	
+	/**
+	 * Get the entity manager factory.  Create one if it does not already exist.
+	 * 
+	 * @return The entity manager factory
+	 */
 	public EntityManagerFactory getEntityManagerFactory() {
 		if (emf == null) {
 			createEntityManagerFactory();
@@ -58,6 +71,9 @@ public class PersistenceManager {
 		return emf;
 	}
 	
+	/**
+	 * Close the entity manager factory
+	 */
 	public void closeEntityManagerFactory() {
 		if (emf != null) {
 			emf.close();
@@ -66,6 +82,9 @@ public class PersistenceManager {
 		}
 	}
 	
+	/**
+	 * Create an entity manager factory
+	 */
 	protected void createEntityManagerFactory() {
 		this.emf = Persistence.createEntityManagerFactory("orcid");
 		LOGGER.info("Persistence started at " + new java.util.Date());

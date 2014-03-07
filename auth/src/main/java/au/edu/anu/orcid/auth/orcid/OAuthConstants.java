@@ -20,6 +20,16 @@
  ******************************************************************************/
 package au.edu.anu.orcid.auth.orcid;
 
+/**
+ * <p>OAuthConstants</p>
+ *
+ * <p>The Australian National University</p>
+ *
+ * <p>Some constants for Authenticating with ORCiD.  Specifically the scopes to interact with ORCiD.</p>
+ *
+ * @author Genevieve Turner
+ *
+ */
 public class OAuthConstants {
 	/**
 	 * Create works scope

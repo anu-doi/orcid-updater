@@ -28,7 +28,7 @@ import javax.xml.bind.annotation.XmlRootElement;
  *
  * <p>The Australian National University</p>
  *
- * <p>Class that deals with access tokens retruned from Orcid OAuth</p>
+ * <p>Class that deals with access tokens returned from Orcid OAuth</p>
  *
  * @author Genevieve Turner
  *

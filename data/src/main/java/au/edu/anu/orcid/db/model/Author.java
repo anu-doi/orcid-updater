@@ -81,7 +81,9 @@ public class Author {
 	}
 
 	/**
-	 * Get the external identifier
+	 * <p>Get the external identifier.</p>
+	 * <p>The intended use of the external identifier for Author is to provide the ability to match an author
+	 * with a {@link Person}</p>
 	 * 
 	 * @return The external identifier
 	 */
@@ -91,7 +93,9 @@ public class Author {
 	}
 
 	/**
-	 * Set the external identifier
+	 * <p>Set the external identifier</p>
+	 * <p>The intended use of the external identifier for Author is to provide the ability to match an author
+	 * with a {@link Person}</p>
 	 * 
 	 * @param extId The external identifier
 	 */
@@ -130,9 +134,9 @@ public class Author {
 	}
 
 	/**
-	 * Set the author name
+	 * Set the author's name
 	 * 
-	 * @param name The author name
+	 * @param name The author's name
 	 */
 	public void setName(String name) {
 		this.name = name;

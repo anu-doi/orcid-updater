@@ -60,6 +60,7 @@ public class GenericDAOImpl<T, PK extends Serializable> implements GenericDAO<T,
 		this.type_ = type;
 	}
 	
+	@Override
 	public T create(T o) {
 		EntityManager entityManager = PersistenceManager.getInstance().getEntityManagerFactory().createEntityManager();
 		EntityTransaction entityTransaction = entityManager.getTransaction();
@@ -74,6 +75,7 @@ public class GenericDAOImpl<T, PK extends Serializable> implements GenericDAO<T,
 		return o;
 	}
 
+	@Override
 	public T getSingleById(PK id) {
 		EntityManager entityManager = PersistenceManager.getInstance().getEntityManagerFactory().createEntityManager();
 		T object = null;
@@ -87,6 +89,7 @@ public class GenericDAOImpl<T, PK extends Serializable> implements GenericDAO<T,
 	}
 
 	@SuppressWarnings("unchecked")
+	@Override
 	public List<T> getAll() {
 		EntityManager entityManager = PersistenceManager.getInstance().getEntityManagerFactory().createEntityManager();
 		List<T> objects = null;
@@ -99,6 +102,7 @@ public class GenericDAOImpl<T, PK extends Serializable> implements GenericDAO<T,
 		return objects;
 	}
 
+	@Override
 	public T update(T o) {
 		EntityManager entityManager = PersistenceManager.getInstance().getEntityManagerFactory().createEntityManager();
 		EntityTransaction entityTransaction = entityManager.getTransaction();
@@ -113,6 +117,7 @@ public class GenericDAOImpl<T, PK extends Serializable> implements GenericDAO<T,
 		return o;
 	}
 
+	@Override
 	public void delete (PK id) {
 		EntityManager entityManager = PersistenceManager.getInstance().getEntityManagerFactory().createEntityManager();
 		EntityTransaction entityTransaction = entityManager.getTransaction();

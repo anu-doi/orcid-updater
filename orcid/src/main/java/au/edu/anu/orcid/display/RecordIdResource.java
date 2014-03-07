@@ -61,6 +61,8 @@ import au.edu.anu.orcid.security.permission.PermissionService;
  * <p>The Australian National University</p>
  *
  * <p>Classes to display a page based on the persons database identifier</p>
+ * <p>Resource that displays information about a person and performs actions in regards to Orcid based on
+ * their database identifier</p>
  *
  * @author Genevieve Turner
  *
@@ -79,7 +81,11 @@ public class RecordIdResource {
 	PermissionService permissionService;
 	
 	/**
-	 * Get the page that displays the users information
+	 * <p>Get the page that displays the users information</p>
+	 * <p><b>URL Syntax</b></p>
+	 * <p>/rest/id/{id}</p>
+	 * <p><b>Method</b></p>
+	 * <p>GET</p>
 	 * 
 	 * @param id The identifier
 	 * @return The page
@@ -102,7 +108,11 @@ public class RecordIdResource {
 	}
 	
 	/**
-	 * Create the record in ORCID
+	 * <p>Create the record in ORCID</p>
+	 * <p><b>URL Syntax</b></p>
+	 * <p>/rest/id/{id}/export/orcid/create?action={action}</p>
+	 * <p><b>Method</b></p>
+	 * <p>GET</p>
 	 * 
 	 * @param id The id of the person to create the record for
 	 * @param action The action to perform
@@ -137,7 +147,11 @@ public class RecordIdResource {
 	}
 	
 	/**
-	 * Get the orcid from the authorization code
+	 * <p>Get the orcid from the authorization code</p>
+	 * <p><b>URL Syntax</b></p>
+	 * <p>/rest/id/{id}/export/orcid/create/process</p>
+	 * <p><b>Method</b></p>
+	 * <p>GET</p>
 	 * 
 	 * @param id The persons id
 	 * @param authorizationCode The authorization code
@@ -165,20 +179,24 @@ public class RecordIdResource {
 	/**
 	 * Get the the URI to return to when attempting to find a users ORCID
 	 * 
-	 * @param uid The persons university id
+	 * @param id The persons university id
 	 * @param uriInfo The URI information
 	 * @return The generated URI
 	 */
 	private URI getImportOrcidIdURI(Long id, UriInfo uriInfo) {
 		UriBuilder builder = UriBuilder.fromUri(uriInfo.getBaseUri());
-		builder.path("uid");
+		builder.path("id");
 		builder.path(id.toString());
 		builder.path("export").path("orcid").path("create/process");
 		return builder.build();
 	}
 	
 	/**
-	 * Begin the process of sending works to ORCID by redirecting to get an authorization code
+	 * <p>Begin the process of sending works to ORCID by redirecting to get an authorization code</p>
+	 * <p><b>URL Syntax</b></p>
+	 * <p>/rest/id/{id}/export/orcid/add-works</p>
+	 * <p><b>Method</b></p>
+	 * <p>GET</p>
 	 * 
 	 * @param id The id of the person to add works to
 	 * @param uriInfo The URI information
@@ -201,7 +219,11 @@ public class RecordIdResource {
 	}
 	
 	/**
-	 * Use the authorization code and add works to the persons ORCID profile
+	 * <p>Use the authorization code and add works to the persons ORCID profile</p>
+	 * <p><b>URL Syntax</b></p>
+	 * <p>/rest/id/{id}/export/orcid/add-works/process?code={code}</p>
+	 * <p><b>Method</b></p>
+	 * <p>GET</p>
 	 * 
 	 * @param id The id of the person
 	 * @param authorizationCode The authorization code
@@ -212,7 +234,7 @@ public class RecordIdResource {
 	 */
 	@GET
 	@Produces(MediaType.TEXT_HTML)
-	@Path("/{uid}/export/orcid/add-works/process")
+	@Path("/{id}/export/orcid/add-works/process")
 	public Response addWorks(@PathParam("id") Long id, @QueryParam("code") String authorizationCode, @Context UriInfo uriInfo)
 			 throws OAuthException, OrcidException, NoRecordException {
 		LOGGER.debug("In process add works");
@@ -228,7 +250,11 @@ public class RecordIdResource {
 	}
 	
 	/**
-	 * Begin the process of sending works to ORCID by redirecting to get an authorization code
+	 * <p>Begin the process of sending works to ORCID by redirecting to get an authorization code</p>
+	 * <p><b>URL Syntax</b></p>
+	 * <p>/rest/id/{id}/orcid/update-works</p>
+	 * <p><b>Method</b></p>
+	 * <p>GET</p>
 	 * 
 	 * @param id The id of the person to add works to
 	 * @param uriInfo The URI information
@@ -251,7 +277,11 @@ public class RecordIdResource {
 	}
 	
 	/**
-	 * Use the authorization code and update works to the persons ORCID profile
+	 * <p>Use the authorization code and update works to the persons ORCID profile</p>
+	 * <p><b>URL Syntax</b></p>
+	 * <p>/rest/id/{id}/export/orcid/update-works/process?code={code}</p>
+	 * <p><b>Method</b></p>
+	 * <p>GET</p>
 	 * 
 	 * @param id The id of the person
 	 * @param authorizationCode The authorization code
@@ -262,7 +292,7 @@ public class RecordIdResource {
 	 */
 	@GET
 	@Produces(MediaType.TEXT_HTML)
-	@Path("/{uid}/export/orcid/update-works/process")
+	@Path("/{id}/export/orcid/update-works/process")
 	public Response updateWorks(@PathParam("id") Long id, @QueryParam("code") String authorizationCode, @Context UriInfo uriInfo)
 			 throws OAuthException, OrcidException, NoRecordException {
 		LOGGER.debug("In process update works");
@@ -308,7 +338,11 @@ public class RecordIdResource {
 	}
 	
 	/**
-	 * Import a users record
+	 * <p>Import a users record</p>
+	 * <p><b>URL Syntax</b></p>
+	 * <p>/rest/uid/{uid}/import</p>
+	 * <p><b>Method</b></p>
+	 * <p>GET</p>
 	 * 
 	 * @param id The id of the person
 	 * @param uriInfo The URI information

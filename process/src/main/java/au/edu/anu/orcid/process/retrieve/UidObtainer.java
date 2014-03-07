@@ -40,7 +40,7 @@ import au.edu.anu.orcid.db.model.Person;
  *
  * <p>The Australian National University</p>
  *
- * <p>Obtain information with the university id</p>
+ * <p>Retrieve and save information based on the institutional unique identifier</p>
  *
  * @author Genevieve Turner
  *
@@ -86,7 +86,7 @@ public class UidObtainer implements Obtainer<String> {
 	/**
 	 * Get the persons  profile
 	 * 
-	 * @param uid The university identifier
+	 * @param uid The institutional unique identifier
 	 * @return The profile
 	 */
 	private OrcidProfile getProfile(String uid) {
@@ -112,7 +112,7 @@ public class UidObtainer implements Obtainer<String> {
 	/**
 	 * Get the persons bio information
 	 * 
-	 * @param uid The university identifier
+	 * @param uid The institutional unique identifier
 	 * @return The bio information
 	 */
 	private OrcidBio getBio(String uid) {
@@ -122,7 +122,7 @@ public class UidObtainer implements Obtainer<String> {
 	/**
 	 * Get the persons works
 	 * 
-	 * @param uid The university identifier
+	 * @param uid The institutional unique identifier
 	 * @return The persons works
 	 */
 	private OrcidWorks getWorks(String uid) {

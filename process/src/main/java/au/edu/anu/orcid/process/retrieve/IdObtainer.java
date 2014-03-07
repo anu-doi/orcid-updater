@@ -40,7 +40,8 @@ import au.edu.anu.orcid.db.model.Person;
  *
  * <p>The Australian National University</p>
  *
- * <p>Rretireve information with a the database id</p>
+ * <p>Retrieve information with a the database id</p>
+ * <p>Retrieve and save information based on the database identifier</p>
  *
  * @author Genevieve Turner
  *
@@ -111,6 +112,7 @@ public class IdObtainer implements Obtainer<Long> {
 	
 	/**
 	 * Get the persons bio information
+	 * 
 	 * @param id The persons id
 	 * @return The bio
 	 */

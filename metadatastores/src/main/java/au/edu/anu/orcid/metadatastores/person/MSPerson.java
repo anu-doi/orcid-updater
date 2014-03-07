@@ -426,7 +426,8 @@ public class MSPerson {
 	}
 	
 	/**
-	 * Generate a Person object from this object
+	 * Transforms the metadata stores person object into a person object suitable for saving to the
+	 * orcid-updater database.
 	 * 
 	 * @return The Person object
 	 */

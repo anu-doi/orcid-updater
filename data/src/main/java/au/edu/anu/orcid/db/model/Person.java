@@ -104,7 +104,9 @@ public class Person {
 	}
 
 	/**
-	 * Get the external identifier
+	 * <p>Get the external identifier</p>
+	 * <p>The intended use of the external identifier is to be able to provide the ability to match to people in
+	 * other classes/tables.  As an example {@link Author}</p>
 	 * 
 	 * @return The external identifier
 	 */
@@ -114,7 +116,9 @@ public class Person {
 	}
 
 	/**
-	 * Set the external identifier
+	 * <p>Set the external identifier</p>
+	 * <p>The intended use of the external identifier is to be able to provide the ability to match to people in
+	 * other classes/tables.  As an example {@link Author}</p>
 	 * 
 	 * @param extId The external identifier
 	 */
@@ -123,7 +127,9 @@ public class Person {
 	}
 
 	/**
-	 * Get the uid
+	 * <p>Get the uid.</p>
+	 * <p>The uid is essentially a unique identifier internal to the university so that it is known on the university
+	 * side who to find/update</p>
 	 * 
 	 * @return The uid
 	 */
@@ -133,7 +139,9 @@ public class Person {
 	}
 
 	/**
-	 * Set the uid
+	 * <p>Set the uid</p>
+	 * <p>The uid is essentially a unique identifier internal to the university so that it is known on the university
+	 * side who to find/update</p>
 	 * 
 	 * @param uid The uid
 	 */

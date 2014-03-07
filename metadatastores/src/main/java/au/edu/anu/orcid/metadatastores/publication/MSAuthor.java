@@ -158,7 +158,9 @@ public class MSAuthor {
 	}
 	
 	/**
-	 * Generate the Author object
+	 * Transform the metadata stores author object into an author object suitable for saving into the orcid-updater
+	 * application.
+	 * 
 	 * @param publication The publication to associate the Author with
 	 * @return The Author
 	 */

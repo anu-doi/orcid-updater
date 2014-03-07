@@ -45,6 +45,8 @@ import au.edu.anu.orcid.util.PropertyLoader;
  * <p>The Australian National University</p>
  *
  * <p>Obtain information about publications from Metadata Stores</p>
+ * <p>Other institutions will need to create an equivalent to this class retrieving information from their appropriate
+ * sources</p>
  *
  * @author Genevieve Turner
  *
@@ -56,9 +58,9 @@ public class ObtainMSPublicationInformation extends
 
 	@Override
 	public List<Publication> fetch(String uid) {
+		// Get the list of publications for the user with the given uid and save the relevant information to the database.
 		Client client = ClientBuilder.newClient();
 		WebTarget target = client.target(metadataStoresProperties.getProperty("app.uri")).path(metadataStoresProperties.getProperty("extension.publication")).path(uid);
-		//WebTarget target = client.target("http://localhost:8180/services/rest/person/publications").path(uid);
 		LOGGER.info("Target URL: {}", target.getUri().toString());
 		
 		Response response = target.request(MediaType.APPLICATION_JSON).get();

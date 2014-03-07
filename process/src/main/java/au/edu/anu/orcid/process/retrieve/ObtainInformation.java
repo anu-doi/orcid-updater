@@ -25,7 +25,7 @@ package au.edu.anu.orcid.process.retrieve;
  *
  * <p>The Australian National University</p>
  *
- * <p>Interface to retrieve and save information about objects with</p>
+ * <p>Interface for the logic around the retrieval and saving of information about objects.</p>
  *
  * @author Genevieve Turner
  *
@@ -36,22 +36,24 @@ public interface ObtainInformation<T, U> {
 	/**
 	 * Get the object
 	 * 
-	 * @param id The id of the person the information is about
+	 * @param id The database id of the person for whom the object is being retrieved
 	 * @return The associated object
 	 */
 	public T get(Long id);
 	
 	/**
 	 * Get the object
-	 * @param uid The university id
+	 * 
+	 * @param uid The institutional unique identifier
 	 * @return The object
 	 */
 	public T get(String uid);
 	
 	/**
-	 * Fetch the object from an external source
+	 * Get the object from an external source and save the relevant information to the orcid-updater database. 
+	 * (e.g. The external source for ANU is metadata stores).
 	 * 
-	 * @param uid The  university id
+	 * @param uid The institutional unique identifier
 	 * @return The fetched object
 	 */
 	public T fetch(String uid);
@@ -66,7 +68,7 @@ public interface ObtainInformation<T, U> {
 	/**
 	 * Get the object in an ORCID object format
 	 * 
-	 * @param id The id
+	 * @param id The database id of the person for whom the orcid object is being retrieved
 	 * @return The orcid object
 	 */
 	public U getOrcidObject(Long id);
@@ -74,7 +76,7 @@ public interface ObtainInformation<T, U> {
 	/**
 	 * Get the object in an ORCID object format
 	 * 
-	 * @param uid
+	 * @param uid The institutional unique identifier
 	 * @return The orcid object
 	 */
 	public U getOrcidObject(String uid);

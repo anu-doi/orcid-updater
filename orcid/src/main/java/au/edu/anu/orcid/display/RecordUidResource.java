@@ -26,7 +26,6 @@ import java.util.Map;
 
 import javax.inject.Inject;
 import javax.ws.rs.GET;
-import javax.ws.rs.NotFoundException;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
@@ -61,7 +60,8 @@ import au.edu.anu.orcid.security.permission.PermissionService;
  *
  * <p>The Australian National University</p>
  *
- * <p>Classes to display a page based on the persons university identifier</p>
+ * <p>Resource that displays information about a person and performs actions in regards to Orcid based on
+ * their institutional unique identifier</p>
  *
  * @author Genevieve Turner
  *
@@ -80,9 +80,13 @@ public class RecordUidResource {
 	PermissionService permissionService;
 	
 	/**
-	 * Get the page that displays the users information
+	 * <p>Get the page that displays the users information</p>
+	 * <p><b>URL Syntax</b></p>
+	 * <p>/rest/uid/{uid}</p>
+	 * <p><b>Method</b></p>
+	 * <p>GET</p>
 	 * 
-	 * @param uid The university id
+	 * @param uid The institutional unique identifier
 	 * @return The response
 	 */
 	@GET
@@ -102,9 +106,13 @@ public class RecordUidResource {
 	}
 	
 	/**
-	 * Create the record in ORCID
+	 * <p>Create the record in ORCiD</p>
+	 * <p><b>URL Syntax</b></p>
+	 * <p>/rest/uid/{uid}/export/orcid/create?action={action}</p>
+	 * <p><b>Method</b></p>
+	 * <p>GET</p>
 	 * 
-	 * @param uid The persons university identifier
+	 * @param uid The institutional unique identifier
 	 * @param action The action to perform.  Possiblities are 'find' and 'create'.
 	 * @param uriInfo The uri information
 	 * @return The response
@@ -140,9 +148,13 @@ public class RecordUidResource {
 	}
 	
 	/**
-	 * Get the orcid from the authorization code
+	 * <p>Get the orcid from the authorization code</p>
+	 * <p><b>URL Syntax</b></p>
+	 * <p>/rest/uid/{uid}/export/orcid/create/process</p>
+	 * <p><b>Method</b></p>
+	 * <p>GET</p>
 	 * 
-	 * @param uid The persons university id
+	 * @param uid The institutional unique identifier
 	 * @param authorizationCode The authorization code
 	 * @param uriInfo The URI information
 	 * @return The response
@@ -169,7 +181,7 @@ public class RecordUidResource {
 	/**
 	 * Get the the URI to return to when attempting to find a users ORCID
 	 * 
-	 * @param uid The persons university id
+	 * @param uid The institutional unique identifier
 	 * @param uriInfo The URI information
 	 * @return The generated URI
 	 */
@@ -180,11 +192,14 @@ public class RecordUidResource {
 		builder.path("export").path("orcid").path("create/process");
 		return builder.build();
 	}
-	
 	/**
-	 * Begin the process of sending works to ORCID by redirecting to get an authorization code
+	 * <p>Begin the process of sending works to ORCID by redirecting to get an authorization code</p>
+	 * <p><b>URL Syntax</b></p>
+	 * <p>/rest/uid/{uid}/export/orcid/add-works</p>
+	 * <p><b>Method</b></p>
+	 * <p>GET</p>
 	 * 
-	 * @param uid The persons university identifier
+	 * @param uid The institutional unique identifier
 	 * @param uriInfo The URI information
 	 * @return The response
 	 */
@@ -205,9 +220,13 @@ public class RecordUidResource {
 	}
 	
 	/**
-	 * Use the authorization code and add works to the persons ORCID profile
+	 * <p>Use the authorization code and add works to the persons ORCID profile</p>
+	 * <p><b>URL Syntax</b></p>
+	 * <p>/rest/uid/{uid}/export/orcid/add-works/process?code={code}</p>
+	 * <p><b>Method</b></p>
+	 * <p>GET</p>
 	 * 
-	 * @param uid The persons university identifier
+	 * @param uid The institutional unique identifier
 	 * @param authorizationCode The authorization code
 	 * @param uriInfo The URI information
 	 * @return The response
@@ -233,9 +252,13 @@ public class RecordUidResource {
 	}
 	
 	/**
-	 * Begin the process of sending works to ORCID by redirecting to get an authorization code
+	 * <p>Begin the process of sending works to ORCID by redirecting to get an authorization code</p>
+	 * <p><b>URL Syntax</b></p>
+	 * <p>/rest/uid/{uid}/orcid/update-works</p>
+	 * <p><b>Method</b></p>
+	 * <p>GET</p>
 	 * 
-	 * @param uid The persons university identifier
+	 * @param uid The institutional unique identifier
 	 * @param uriInfo The URI information
 	 * @return The response
 	 */
@@ -256,9 +279,13 @@ public class RecordUidResource {
 	}
 	
 	/**
-	 * Use the authorization code and update works to the persons ORCID profile
+	 * <p>Use the authorization code and update works to the persons ORCID profile</p>
+	 * <p><b>URL Syntax</b></p>
+	 * <p>/rest/uid/{uid}/export/orcid/update-works/process?code={code}</p>
+	 * <p><b>Method</b></p>
+	 * <p>GET</p>
 	 * 
-	 * @param uid The persons university identifier
+	 * @param uid The institutional unique identifier
 	 * @param authorizationCode The authorization code
 	 * @param uriInfo The URI information
 	 * @return The response
@@ -285,7 +312,7 @@ public class RecordUidResource {
 	/**
 	 * Get the URI for the page that displays the information about the person
 	 * 
-	 * @param uid The persons university identifier
+	 * @param uid The institutional unique identifier
 	 * @param uriInfo The URI information
 	 * @return The URI
 	 */
@@ -299,7 +326,7 @@ public class RecordUidResource {
 	/**
 	 * Get the URI to process the adding of works
 	 * 
-	 * @param uid The persons university identifier
+	 * @param uid The institutional unique identifier
 	 * @param uriInfo The URI information
 	 * @return The URI
 	 */
@@ -313,9 +340,13 @@ public class RecordUidResource {
 	}
 	
 	/**
-	 * Import a users record
+	 * <p>Import a users record</p>
+	 * <p><b>URL Syntax</b></p>
+	 * <p>/rest/uid/{uid}/import</p>
+	 * <p><b>Method</b></p>
+	 * <p>GET</p>
 	 * 
-	 * @param uid The persons university identifier
+	 * @param uid The institutional unique identifier
 	 * @param uriInfo The URI information
 	 * @return The response
 	 */

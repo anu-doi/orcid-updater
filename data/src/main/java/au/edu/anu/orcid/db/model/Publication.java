@@ -72,7 +72,6 @@ public class Publication {
 	
 	private Long id;
 	private String externalIdentifier;
-	//private String ariesId;
 	private String title;
 	private String publicationName;
 	private String publicationYear;
@@ -108,34 +107,29 @@ public class Publication {
 		this.id = id;
 	}
 
+	/**
+	 * <p>Get the external identifier</p>
+	 * <p>The external identifier for Publications is an identifier from the source system.  It is there for identification
+	 * purposes so that the record can be updated rather than a new record added</p>
+	 * 
+	 * @return The external identifier
+	 */
 	@Column(name="external_id")
 	public String getExternalIdentifier() {
 		return externalIdentifier;
 	}
 
+	/**
+	 * Set the external identifier
+	 * <p>The external identifier for Publications is an identifier from the source system.  It is there for identification
+	 * purposes so that the record can be updated rather than a new record added</p>
+	 * 
+	 * @param externalIdentifier The external identifier
+	 */
 	public void setExternalIdentifier(String externalIdentifier) {
 		this.externalIdentifier = externalIdentifier;
 	}
-
-	// TODO change this to an external identifier?
-	/**
-	 * Get the aries id
-	 * 
-	 * @return The aries id
-	 */
-	/*@Column(name="aries_id")
-	public String getAriesId() {
-		return ariesId;
-	}*/
-
-	/**
-	 * Set the aries id
-	 * @param ariesId
-	 */
-	/*public void setAriesId(String ariesId) {
-		this.ariesId = ariesId;
-	}*/
-
+	
 	/**
 	 * Get the title
 	 * 
@@ -263,7 +257,7 @@ public class Publication {
 	}
 
 	/**
-	 * Set teh associated authors
+	 * Set the associated authors
 	 * 
 	 * @param authors The authors
 	 */
@@ -272,8 +266,9 @@ public class Publication {
 	}
 
 	/**
+	 * Get the OrcidWork
 	 * 
-	 * @return
+	 * @return The work
 	 */
 	@Transient
 	public OrcidWork getWork() {
@@ -323,6 +318,7 @@ public class Publication {
 
 	/**
 	 * Get the ORCID language code
+	 * 
 	 * @return
 	 */
 	@Transient
@@ -359,6 +355,7 @@ public class Publication {
 
 	/**
 	 * Get  an associated URL for ORCID
+	 * 
 	 * @return The url
 	 */
 	@Transient
@@ -368,6 +365,7 @@ public class Publication {
 
 	/**
 	 * Get the Visibility for ORCID
+	 * 
 	 * @return The visibility
 	 */
 	@Transient
@@ -377,6 +375,7 @@ public class Publication {
 
 	/**
 	 * Get the citation for ORCID
+	 * 
 	 * @return The citation
 	 */
 	@Transient
@@ -414,7 +413,7 @@ public class Publication {
 	@Transient
 	private WorkExternalIdentifiers getExternalIdentifiers() {
 		WorkExternalIdentifiers identifiers = new WorkExternalIdentifiers();
-		//identifiers.
+		
 		if (isbn != null) {
 			WorkExternalIdentifier identifier = new WorkExternalIdentifier();
 			identifier.setWorkExternalIdentifierId(isbn);
@@ -435,6 +434,7 @@ public class Publication {
 
 	/**
 	 * Get the source for ORCID
+	 * 
 	 * @return
 	 */
 	@Transient
@@ -444,6 +444,7 @@ public class Publication {
 
 	/**
 	 * Get the work title for ORCID
+	 * 
 	 * @return
 	 */
 	@Transient

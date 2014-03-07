@@ -148,6 +148,12 @@ public abstract class ObtainPublicationInformation implements ObtainInformation<
 		return publicationListToWorks(publications);
 	}
 	
+	/**
+	 * Transform the list of publications to a list of OrcidWork objects.
+	 * 
+	 * @param publications The publications to transform
+	 * @return A list of OrcidWork objects
+	 */
 	private List<OrcidWork> publicationListToWorks(List<Publication> publications) {
 		List<OrcidWork> works = new ArrayList<OrcidWork>();
 		

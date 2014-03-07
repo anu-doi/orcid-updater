@@ -42,6 +42,8 @@ import au.edu.anu.orcid.util.PropertyLoader;
  * <p>The Australian National University</p>
  *
  * <p>Obtain information about the given person from Metadata Stores</p>
+ * <p>Other institutions will need to create an equivalent to this class retrieving information from their appropriate
+ * sources</p>
  *
  * @author Genevieve Turner
  *
@@ -52,6 +54,7 @@ public class ObtainMSPersonInformation extends ObtainPersonInformation {
 
 	@Override
 	public Person fetch(String uid) {
+		// Get the information about the person with the given uid and save the relevant information to the database.
 		Client client = ClientBuilder.newClient();
 		WebTarget target = client.target(metadataStoresProperties.getProperty("app.uri")).path(metadataStoresProperties.getProperty("extension.person")).path(uid);
 		LOGGER.info("Target URL: {}", target.getUri().toString());
