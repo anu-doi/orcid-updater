@@ -55,7 +55,7 @@
 <h2>Publications</h2>
 <p class="small">Click the publication name to view more details</p>
 <c:if test="${not empty it.message.orcidProfile.orcidActivities.orcidWorks}">
-	<ul class=" nobullet">
+	<ul class="noindent">
 		<c:forEach var="work" items="${it.message.orcidProfile.orcidActivities.orcidWorks.orcidWork}" varStatus="theCount">
 			<li class="has-tooltip">
 				<label>${work.workTitle.title}</label>
