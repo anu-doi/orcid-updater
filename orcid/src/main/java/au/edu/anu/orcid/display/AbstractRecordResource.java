@@ -111,13 +111,12 @@ public abstract class AbstractRecordResource<T> {
 	 */
 	public Response updateOrcid(T id, Obtainer<T> obtainer, String authorizationCode
 			, @Context UriInfo uriInfo) throws OAuthException, NoRecordException {
-		LOGGER.debug("In process add works");
 		Person person = obtainer.getPerson(id);
 		permissionService.checkPerson(person);
 		OAuthAuthenticator auth = new OAuthAuthenticator();
 		AccessToken token = auth.getAccessTokenFromAuthorizationCode(authorizationCode);
 		if (token.getOrcid() != null) {
-			LOGGER.info("Orcid {} for User {}", token.getOrcid(), id);
+			LOGGER.info("Updating Orcid {} for User {}", token.getOrcid(), id);
 			person.setOrcid(token.getOrcid());
 			obtainer.updatePerson(person);
 		}

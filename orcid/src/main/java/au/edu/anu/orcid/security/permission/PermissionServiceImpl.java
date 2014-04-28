@@ -26,7 +26,7 @@ public class PermissionServiceImpl implements PermissionService {
 
 	@Override
 	public void checkPerson(Person person) {
-		LOGGER.info("Checked Whether the person had permissions");
+		LOGGER.debug("Checked Whether the person had permissions");
 	}
 
 }

@@ -125,7 +125,7 @@ public class OAuthAuthenticator {
 			else {
 				String textResponse = response.readEntity(String.class);
 				LOGGER.info("Location is null. Response Status: {}", response.getStatus());
-				LOGGER.info("Response: {}", textResponse);
+				LOGGER.debug("Response: {}", textResponse);
 				throw new OAuthException("There was an error while creating an ORCiD profile");
 			}
 			String textResponse = response.readEntity(String.class);
@@ -148,7 +148,7 @@ public class OAuthAuthenticator {
 		if (createToken_ == null) {
 			Client client = getClient();
 			WebTarget target = client.target(orcidProperties_.getProperty("orcid.api.uri")).path("oauth").path("token");
-			LOGGER.info("Target URL: {}", target.getUri().toString());
+			LOGGER.debug("Target URL: {}", target.getUri().toString());
 			Form form = new Form();
 			form.param("grant_type", "client_credentials");
 			form.param("client_id", clientId_);
@@ -156,14 +156,13 @@ public class OAuthAuthenticator {
 			form.param("scope",  "/orcid-profile/create");
 			
 			Response response = target.request(MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML).post(Entity.form(form));
-			LOGGER.info("Response Status: {}", response.getStatus());
 			if (response.getStatus() == 200) {
 				createToken_ = response.readEntity(AccessToken.class);
 			}
 			else {
-				LOGGER.info("Response Content Type: {}", response.getHeaders().get("Content-Type"));
+				LOGGER.error("Error retreiving create credentials with the status {} and content type {}", response.getStatus(), response.getHeaders().get("Content-Type"));
 				String value = response.readEntity(String.class);
-				LOGGER.error("Response: {}", value);
+				LOGGER.debug("Response Value: {}", value);
 				throw new OAuthException("Exception trying to authenticate with server");
 			}
 		}
@@ -211,7 +210,7 @@ public class OAuthAuthenticator {
 			else {
 				LOGGER.error("Error adding works. Status Code: {}", response.getStatus());
 				String responseVal = response.readEntity(String.class);
-				LOGGER.info("Response Value: {}", responseVal);
+				LOGGER.debug("Response Value: {}", responseVal);
 				throw new OrcidException("Exception adding works");
 			}
 		}
@@ -257,7 +256,7 @@ public class OAuthAuthenticator {
 			else {
 				LOGGER.error("Error adding works. Status Code: {}", response.getStatus());
 				String responseVal = response.readEntity(String.class);
-				LOGGER.info("Response Value: {}", responseVal);
+				LOGGER.debug("Response Value: {}", responseVal);
 				throw new OrcidException("Exception updating works");
 			}
 		}
@@ -305,9 +304,9 @@ public class OAuthAuthenticator {
 		form.param("grant_type", "authorization_code");
 		form.param("code", authorizationCode);
 		
-		LOGGER.info("Exchange authorization");
+		LOGGER.debug("Exchange authorization");
 		Response response = target.request().accept(MediaType.APPLICATION_JSON).post(Entity.entity(form, MediaType.APPLICATION_FORM_URLENCODED));
-		LOGGER.info("Authorization Exchanged.  Processing Response");
+		LOGGER.debug("Authorization Exchanged.  Processing Response");
 		if (response.getStatus() == 200) {
 			AccessToken accessToken = response.readEntity(AccessToken.class);
 			return accessToken;
@@ -315,7 +314,7 @@ public class OAuthAuthenticator {
 		else {
 			String responseVal = response.readEntity(String.class);
 			LOGGER.error("Status: {}", response.getStatus());
-			LOGGER.info("Response Value: {}", responseVal);
+			LOGGER.debug("Response Value: {}", responseVal);
 			throw new OAuthException("Token not generated");
 		}
 	}

@@ -127,6 +127,7 @@ public class RecordUidResource extends AbstractRecordResource<String> {
 	@Path("/{uid}/export/orcid/create/process")
 	public Response updateOrcid(@PathParam("uid") String uid, @QueryParam("code") String authorizationCode
 			, @Context UriInfo uriInfo) throws OAuthException, NoRecordException {
+		LOGGER.debug("Attempting to retrieve the ORCID for the user with the university id {}", uid);
 		return super.updateOrcid(uid, uidObtainer, authorizationCode, uriInfo);
 	}
 	
