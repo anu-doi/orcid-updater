@@ -61,7 +61,7 @@ public class ObtainMSPublicationInformation extends
 		// Get the list of publications for the user with the given uid and save the relevant information to the database.
 		Client client = ClientBuilder.newClient();
 		WebTarget target = client.target(metadataStoresProperties.getProperty("app.uri")).path(metadataStoresProperties.getProperty("extension.publication")).path(uid);
-		LOGGER.info("Target URL: {}", target.getUri().toString());
+		LOGGER.info("Retrieving publication data from URL: {}", target.getUri().toString());
 		
 		Response response = target.request(MediaType.APPLICATION_JSON).get();
 		List<MSPublication> msPublications = response.readEntity(new GenericType<List<MSPublication>>(){});

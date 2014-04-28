@@ -1,8 +1,5 @@
 package au.edu.anu.orcid.auth.orcid;
 
-import static org.junit.Assert.fail;
-
-import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;

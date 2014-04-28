@@ -22,8 +22,6 @@ package au.edu.anu.orcid.auth.orcid;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -36,13 +34,9 @@ import javax.ws.rs.core.Form;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriBuilder;
-import javax.xml.bind.JAXBElement;
 
 import org.glassfish.jersey.client.ClientProperties;
-import org.orcid.ns.orcid.OrcidActivities;
 import org.orcid.ns.orcid.OrcidMessage;
-import org.orcid.ns.orcid.OrcidWork;
-import org.orcid.ns.orcid.OrcidWorks;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -108,17 +102,17 @@ public class OAuthAuthenticator {
 	 * @throws OAuthException
 	 */
 	public String createOrcid(OrcidMessage message) throws OAuthException {
-		LOGGER.debug("In createOrcid");
+		LOGGER.debug("Creating orcid identifier...");
 		if (message != null) {
 			String authorizationStr = getCreateCredentials();
-			LOGGER.info(authorizationStr);
+			LOGGER.info("Authorization code retireved from orcid: {}", authorizationStr);
 			Client client = getClient();
 			WebTarget target = client.target(orcidProperties_.getProperty("orcid.version.api.uri")).path("orcid-profile");
 			LOGGER.info("Sending Create Record request to orcid");
 			Response response = target.request().accept(MediaType.APPLICATION_XML).header("Authorization", authorizationStr).post(Entity.entity(message, "application/vdn.orcid+xml"));
 			URI location = response.getLocation();
 			if (location != null) {
-				LOGGER.info("Location: {}", location.toString());
+				LOGGER.info("Location returned from Orcid: {}", location.toString());
 				// Search for a url equivalent to: https://api.sandbox-1.orcid.org/0000-0001-8025-637X/orcid-profile
 				Matcher m = orcidUrlPattern.matcher(location.toString());
 				boolean found = m.find();
@@ -162,12 +156,12 @@ public class OAuthAuthenticator {
 			form.param("scope",  "/orcid-profile/create");
 			
 			Response response = target.request(MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML).post(Entity.form(form));
-			LOGGER.info("Status: {}", response.getStatus());
+			LOGGER.info("Response Status: {}", response.getStatus());
 			if (response.getStatus() == 200) {
 				createToken_ = response.readEntity(AccessToken.class);
 			}
 			else {
-				LOGGER.info("Content Type: {}", response.getHeaders().get("Content-Type"));
+				LOGGER.info("Response Content Type: {}", response.getHeaders().get("Content-Type"));
 				String value = response.readEntity(String.class);
 				LOGGER.error("Response: {}", value);
 				throw new OAuthException("Exception trying to authenticate with server");
@@ -189,7 +183,7 @@ public class OAuthAuthenticator {
 	 */
 	public void addWorks(String orcid, OrcidMessage message, String authorizationCode) throws OAuthException, OrcidException {
 		AccessToken token = getAccessTokenFromAuthorizationCode(authorizationCode);
-		LOGGER.debug("{} - {} - {}", token.getTokenType(), token.getAccessToken(), token.getRefreshToken());
+		LOGGER.debug("Token Information: {} - {} - {}", token.getTokenType(), token.getAccessToken(), token.getRefreshToken());
 		addWorks(token, message);
 	}
 	
@@ -253,17 +247,9 @@ public class OAuthAuthenticator {
 			Client client = getClient();
 			
 			WebTarget target = client.target(orcidProperties_.getProperty("orcid.version.api.uri")).path(token.getOrcid()).path("orcid-works");
-			Response response = target.request().accept(MediaType.APPLICATION_XML).header("Authorization", authorizationStr).get();
-			if (response.getStatus() == 200) {
-				OrcidMessage readWorksMessage = response.readEntity(OrcidMessage.class);
-				processReadWorksMessage(message, readWorksMessage);
-			}
-			else {
-				throw new OrcidException("Unable to read users works");
-			}
 			
 			LOGGER.info("Sending Update Works request to orcid.  URL: {}", target.getUri());
-			response = target.request().accept(MediaType.APPLICATION_XML).header("Authorization", authorizationStr).put(Entity.entity(message, "application/orcid+xml"));
+			Response response = target.request().accept(MediaType.APPLICATION_XML).header("Authorization", authorizationStr).put(Entity.entity(message, "application/orcid+xml"));
 			if (response.getStatus() == 200) {
 				//Do nothing
 				LOGGER.info("Works updated successfully");
@@ -277,34 +263,6 @@ public class OAuthAuthenticator {
 		}
 		else {
 			generateNullMessageOrToken(message, token);
-		}
-	}
-	
-	/**
-	 * <p>This method adds the works that already exist in the users profile to the message that will be sent
-	 * to ORCiD</p>
-	 * <p>This is to reduce possible loss of the users publications</p>
-	 * 
-	 * @param message The orcid message to send to orcid
-	 * @param readWorksMessage The orcid message read from orcid
-	 */
-	private void processReadWorksMessage(OrcidMessage message, OrcidMessage readWorksMessage) {
-		OrcidActivities activities = readWorksMessage.getOrcidProfile().getOrcidActivities();
-		OrcidWorks readOrcidWorks = activities.getOrcidWorks();
-		if (readOrcidWorks != null) {
-			List<OrcidWork> worksToAdd = new ArrayList<OrcidWork>();
-			for (OrcidWork work : readOrcidWorks.getOrcidWork()) {
-				List<JAXBElement<String>> sourceVals = work.getWorkSource().getContent();
-				for (JAXBElement<String> element : sourceVals) {
-					if ("path".equals(element.getName().getLocalPart())) {
-						if (!clientId_.equals(element.getValue())) {
-							worksToAdd.add(work);
-						}
-					}
-				}
-			}
-			LOGGER.debug("Number of works to add: {}", worksToAdd.size());
-			message.getOrcidProfile().getOrcidActivities().getOrcidWorks().getOrcidWork().addAll(worksToAdd);
 		}
 	}
 	
@@ -371,6 +329,7 @@ public class OAuthAuthenticator {
 	 * @throws UnsupportedEncodingException
 	 */
 	public URI getAuthorizationCodeRequestUri(String scope, String redirectURI) {
+		LOGGER.debug("Generating authorization code request Uri. Scope: {}, Redirect URI: {}", scope, redirectURI);
 		UriBuilder builder = UriBuilder.fromPath(orcidProperties_.getProperty("orcid.auth.uri")).path("oauth").path("authorize");
 		builder = builder. queryParam("client_id", clientId_);
 		builder = builder.queryParam("response_type", "code");

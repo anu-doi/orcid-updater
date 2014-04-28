@@ -59,7 +59,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 	public void configureGlobal(AuthenticationManagerBuilder auth) throws Exception {
 		Properties properties = PropertyLoader.loadProperties("ldap.properties");
 		LdapUserDetailsMapper contextMapper = new LdapUserDetailsMapper();
-		contextMapper.setRoleAttributes(new String[]{"affiliation"});
+		//contextMapper.setRoleAttributes(new String[]{"affiliation"});
 		contextMapper.setPasswordAttributeName("password");
 		
 		String ldapUri = properties.getProperty("ldap.uri");

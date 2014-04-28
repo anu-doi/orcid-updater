@@ -49,11 +49,11 @@ public class OrcidAuthenticationSuccessHandler implements
 	public void onAuthenticationSuccess(HttpServletRequest request,
 			HttpServletResponse response, Authentication authentication)
 			throws IOException, ServletException {
-		LOGGER.info("Authentication Name: {}", authentication.getName());
+		LOGGER.debug("User {} has authenticated", authentication.getName());
 		
 		if (authentication.getName().startsWith("u")) {
 			String newPath = request.getContextPath() + "/rest/uid/" + authentication.getName() + "/import";
-			LOGGER.info("New Path: {}", newPath);
+			LOGGER.debug("User {} logged in, redirecting the user to: {}", authentication.getName(), newPath);
 			response.sendRedirect(newPath);
 		}
 		else {

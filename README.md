@@ -25,7 +25,7 @@ To customise this application you will need to as a minimum perform the followin
 2. Make an equivalent of the metadatastores module and adjust the "/orcid/pom.xml" accordingly.  Specifically you will need to have your own equivalents for ObtainMSPersonInformation and ObtainMSPublicationInformation (i.e. extending ObtainPersonInformation and ObtainPublicationInformation with the fetch method) such that you can get the data from your own systems to save in the database.
 You will then need to update the personOI and pubOI with the appropriate class implementations.
 3. Modify ldap.properties (found in "/orcid/src/main/resources") to your own environment.
-4. Modify the jsp files (found in "/orcid/src/main/webapp/jsp").  These will need to be skinned appropriately for your organisation.
+4. Modify the jsp files (found in "/orcid/src/main/webapp/jsp").  These will need to be skinned appropriately for your organisation.  Accordingly remove the es-maven repository and anu-taglib dependency as these are ANU specific.
 
 ##Schema
 This version supports the ORCiD message schema 1.1

@@ -57,7 +57,7 @@ public class ObtainMSPersonInformation extends ObtainPersonInformation {
 		// Get the information about the person with the given uid and save the relevant information to the database.
 		Client client = ClientBuilder.newClient();
 		WebTarget target = client.target(metadataStoresProperties.getProperty("app.uri")).path(metadataStoresProperties.getProperty("extension.person")).path(uid);
-		LOGGER.info("Target URL: {}", target.getUri().toString());
+		LOGGER.info("Retrieving person data from URL: {}", target.getUri().toString());
 		
 		Response response = target.request(MediaType.APPLICATION_JSON).get();
 		MSPerson msPerson = response.readEntity(MSPerson.class);

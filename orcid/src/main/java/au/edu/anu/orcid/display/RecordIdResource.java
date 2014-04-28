@@ -95,7 +95,6 @@ public class RecordIdResource {
 	@Path("/{id}")
 	public Response getPage(@PathParam("id") Long id) throws NoRecordException {
 		LOGGER.info("Attempting to find record for: {}", id);
-		//Person person = permissionService.getPerson(id);
 		Person person = idObtainer.getPerson(id);
 		permissionService.checkPerson(person);
 		OrcidMessage message = idObtainer.getFullOrcidProfile(id);
@@ -125,6 +124,7 @@ public class RecordIdResource {
 	public Response beginRecordUpdateRequest(@PathParam("id") Long id, @QueryParam("action") String action
 			, @Context UriInfo uriInfo) throws OAuthException, NoRecordException {
 		Person person = idObtainer.getPerson(id);
+		permissionService.checkPerson(person);
 		if ("find".equals(action)) {
 			URI createURI = getImportOrcidIdURI(id, uriInfo);
 			OAuthAuthenticator auth = new OAuthAuthenticator();
@@ -166,6 +166,7 @@ public class RecordIdResource {
 			, @Context UriInfo uriInfo) throws OAuthException, NoRecordException {
 		LOGGER.debug("In process add works");
 		Person person = idObtainer.getPerson(id);
+		permissionService.checkPerson(person);
 		OAuthAuthenticator auth = new OAuthAuthenticator();
 		AccessToken token = auth.getAccessTokenFromAuthorizationCode(authorizationCode);
 		if (token.getOrcid() != null) {
@@ -205,16 +206,14 @@ public class RecordIdResource {
 	@GET
 	@Produces(MediaType.TEXT_HTML)
 	@Path("/{id}/export/orcid/add-works")
-	public Response updateWorks(@PathParam("id") Long id, @Context UriInfo uriInfo) throws NoRecordException {
-		LOGGER.debug("In add works");
+	public Response addWorks(@PathParam("id") Long id, @Context UriInfo uriInfo) throws NoRecordException {
+		LOGGER.debug("Beginning the process for adding works...");
 		Person person = idObtainer.getPerson(id);
 		permissionService.checkPerson(person);
 		URI getRedirectURI = getUpdateRedirectURI(id, uriInfo, "update-works/process");
-		LOGGER.info("Redirect URI {}", getRedirectURI.toString());
 		OAuthAuthenticator auth = new OAuthAuthenticator();
 		URI codeRequestURI = auth.getAuthorizationCodeRequestUri(OAuthConstants.WORKS_CREATE, getRedirectURI.toString());
 		
-		LOGGER.info("URI to go to: {}", codeRequestURI);
 		return Response.seeOther(codeRequestURI).build();
 	}
 	
@@ -237,15 +236,13 @@ public class RecordIdResource {
 	@Path("/{id}/export/orcid/add-works/process")
 	public Response addWorks(@PathParam("id") Long id, @QueryParam("code") String authorizationCode, @Context UriInfo uriInfo)
 			 throws OAuthException, OrcidException, NoRecordException {
-		LOGGER.debug("In process add works");
+		LOGGER.debug("Attempting to add works...");
 		Person person = idObtainer.getPerson(id);
 		permissionService.checkPerson(person);
 		OAuthAuthenticator auth = new OAuthAuthenticator();
 		AccessToken token = auth.getAccessTokenFromAuthorizationCode(authorizationCode);
 		OrcidMessage message = idObtainer.getOrcidWorks(id);
-		LOGGER.debug("Adding Works");
 		auth.updateWorks(token, message);
-		LOGGER.debug("Works added");
 		return Response.seeOther(getPageURI(id, uriInfo)).build();
 	}
 	
@@ -263,14 +260,14 @@ public class RecordIdResource {
 	@GET
 	@Produces(MediaType.TEXT_HTML)
 	@Path("/{id}/export/orcid/update-works")
-	public Response addWorks(@PathParam("id") Long id, @Context UriInfo uriInfo) throws NoRecordException {
-		LOGGER.debug("In update works");
+	public Response updateWorks(@PathParam("id") Long id, @Context UriInfo uriInfo) throws NoRecordException {
+		LOGGER.debug("Beginning the process to update works...");
 		Person person = idObtainer.getPerson(id);
 		permissionService.checkPerson(person);
 		URI getRedirectURI = getUpdateRedirectURI(id, uriInfo, "update-works/process");
 		LOGGER.info("Redirect URI {}", getRedirectURI.toString());
 		OAuthAuthenticator auth = new OAuthAuthenticator();
-		URI codeRequestURI = auth.getAuthorizationCodeRequestUri(OAuthConstants.WORKS_READ + " " + OAuthConstants.WORKS_UPDATE, getRedirectURI.toString());
+		URI codeRequestURI = auth.getAuthorizationCodeRequestUri(OAuthConstants.WORKS_UPDATE, getRedirectURI.toString());
 		
 		LOGGER.info("URI to go to: {}", codeRequestURI);
 		return Response.seeOther(codeRequestURI).build();
@@ -295,15 +292,13 @@ public class RecordIdResource {
 	@Path("/{id}/export/orcid/update-works/process")
 	public Response updateWorks(@PathParam("id") Long id, @QueryParam("code") String authorizationCode, @Context UriInfo uriInfo)
 			 throws OAuthException, OrcidException, NoRecordException {
-		LOGGER.debug("In process update works");
+		LOGGER.debug("Attempting to add works...");
 		Person person = idObtainer.getPerson(id);
 		permissionService.checkPerson(person);
 		OAuthAuthenticator auth = new OAuthAuthenticator();
 		AccessToken token = auth.getAccessTokenFromAuthorizationCode(authorizationCode);
 		OrcidMessage message = idObtainer.getOrcidWorks(id);
-		LOGGER.debug("Updating Works");
 		auth.addWorks(token, message);
-		LOGGER.debug("Works added");
 		return Response.seeOther(getPageURI(id, uriInfo)).build();
 	}
 	
@@ -351,6 +346,7 @@ public class RecordIdResource {
 	@GET
 	@Path("/{id}/import")
 	public Response updatePerson(@PathParam("id") Long id, @Context UriInfo uriInfo) {
+		LOGGER.debug("Importing record for id: {}", id);
 		idObtainer.fetchPerson(id);
 		return Response.seeOther(getPageURI(id, uriInfo)).build();
 	}

@@ -64,7 +64,6 @@ public class AccessDeniedExceptionMapper implements ExceptionMapper<AccessDenied
 
 	@Override
 	public Response toResponse(AccessDeniedException exception) {
-		LOGGER.debug("In toResponse");
 		Response resp;
 		List<MediaType> acceptableMediaTypes = headers.getAcceptableMediaTypes();
 		
