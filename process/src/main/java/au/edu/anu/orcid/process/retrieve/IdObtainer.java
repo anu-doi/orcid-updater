@@ -105,7 +105,7 @@ public class IdObtainer implements Obtainer<Long> {
 			profile.setOrcidActivities(activities);
 		}
 		else {
-			LOGGER.info("No works found!");
+			LOGGER.debug("No works found for user with id {}", id);
 		}
 		return profile;
 	}

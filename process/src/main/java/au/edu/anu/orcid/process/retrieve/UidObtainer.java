@@ -104,7 +104,7 @@ public class UidObtainer implements Obtainer<String> {
 			profile.setOrcidActivities(activities);
 		}
 		else {
-			LOGGER.info("No works found!");
+			LOGGER.debug("No works found for user with university id {}", uid);
 		}
 		return profile;
 	}
